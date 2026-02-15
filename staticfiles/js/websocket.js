@@ -44,7 +44,6 @@ function sendMessage(content) {
     }
 }
 
-// Функция для добавления сообщения в DOM
 function addMessageToChat(data) {
     const messageList = document.getElementById('message-list');
     if (!messageList) return;
@@ -53,32 +52,34 @@ function addMessageToChat(data) {
     messageDiv.className = 'message';
     messageDiv.id = 'msg-' + data.message_id;
 
-    // Аватар (заглушка)
     const avatar = document.createElement('img');
-    avatar.src = '/static/images/default-avatar.png'; // нужно будет заменить на реальный аватар
+    avatar.src = '/static/images/default-avatar.png';
     avatar.className = 'avatar-tiny';
     messageDiv.appendChild(avatar);
 
-    const senderSpan = document.createElement('span');
-    senderSpan.className = 'sender';
-    senderSpan.textContent = data.sender_name;
-    messageDiv.appendChild(senderSpan);
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
 
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'time';
-    timeSpan.textContent = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    messageDiv.appendChild(timeSpan);
+    const senderSpan = document.createElement('span');
+    senderSpan.className = 'message-sender';
+    senderSpan.textContent = data.sender_name;
+    bubble.appendChild(senderSpan);
 
     const contentDiv = document.createElement('div');
-    contentDiv.className = 'content';
+    contentDiv.className = 'message-content';
     contentDiv.textContent = data.content;
-    messageDiv.appendChild(contentDiv);
+    bubble.appendChild(contentDiv);
 
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'message-time';
+    timeSpan.textContent = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    bubble.appendChild(timeSpan);
+
+    messageDiv.appendChild(bubble);
     messageList.appendChild(messageDiv);
     messageList.scrollTop = messageList.scrollHeight;
 }
 
-// Функция обновления статуса друга
 function updateFriendStatus(userId, status) {
     const statusSpans = document.querySelectorAll(`.status[data-user-id="${userId}"]`);
     statusSpans.forEach(span => {

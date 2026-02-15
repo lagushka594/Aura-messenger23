@@ -66,7 +66,7 @@ def add_friend(request):
     if request.method == 'POST':
         form = AddFriendForm(request.POST, user=request.user)
         if form.is_valid():
-            friend = form.cleaned_data['friend']
+            friend = form.cleaned_data['friend_id']  # Исправлено: friend -> friend_id
             if Friendship.objects.filter(
                 (Q(from_user=request.user, to_user=friend) | Q(from_user=friend, to_user=request.user))
             ).exists():
