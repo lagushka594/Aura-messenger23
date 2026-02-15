@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="settings">
+    <h2>Настройки</h2>
+    <ul class="settings-list">
+        <li><a href="{% url 'users:change_password' %}" class="btn">Изменить пароль</a></li>
+        <li><a href="{% url 'users:change_email' %}" class="btn">Изменить email</a></li>
+        <li><a href="{% url 'users:change_username' %}" class="btn">Изменить никнейм</a></li>
+        <li><a href="{% url 'users:change_bio' %}" class="btn">Изменить описание</a></li>
+        <li><a href="{% url 'users:change_status' %}" class="btn">Изменить статус</a></li>
+    </ul>
+</div>
+{% endblock %}

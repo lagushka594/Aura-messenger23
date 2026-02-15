@@ -1,8 +1,29 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="chat-placeholder">
-    <h1>Список чатов</h1>
-    <p>Добро пожаловать! Здесь будут отображаться ваши беседы.</p>
+<div class="chat-index">
+    <div class="chat-index-header">
+        <h1>Чаты</h1>
+        <a href="{% url 'chat:create_chat' %}" class="btn btn-primary">➕ Создать</a>
+    </div>
+    <ul class="conversation-list">
+        {% for conv in conversations %}
+        <li>
+            <a href="{% url 'chat:room' conv.id %}">
+                {% if conv.avatar %}
+                    <img src="{{ conv.avatar.url }}" class="avatar-small">
+                {% else %}
+                    <img src="{% static 'images/default-avatar.png' %}" class="avatar-small">
+                {% endif %}
+                <div class="conversation-info">
+                    <span class="conversation-name">{{ conv.name|default:'Личный чат' }}</span>
+                    <span class="last-message">{{ conv.last_msg_content|truncatechars:30 }}</span>
+                </div>
+            </a>
+        </li>
+        {% empty %}
+        <li>У вас пока нет чатов. Создайте новый!</li>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}

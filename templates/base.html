@@ -29,10 +29,11 @@
             {% if user.is_authenticated %}
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="{% url 'chat:index' %}">💬 Сообщения</a></li>
+                    <li><a href="{% url 'chat:index' %}">💬 Чаты</a></li>
                     <li><a href="{% url 'users:friends' %}">👥 Контакты</a></li>
                     <li><a href="{% url 'users:friend_requests' %}">📨 Заявки</a></li>
-                    <li><a href="{% url 'users:profile' %}">⚙️ Мой профиль</a></li>
+                    <li><a href="{% url 'users:profile' %}">⚙️ Профиль</a></li>
+                    <li><a href="{% url 'users:settings' %}">🔧 Настройки</a></li>
                 </ul>
             </nav>
 

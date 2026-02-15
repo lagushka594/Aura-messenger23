@@ -3,19 +3,19 @@
 {% block content %}
 <div class="profile">
     <h2>{{ profile_user.get_display_name }}</h2>
-    <div class="avatar-large">
+    <div class="avatar-wrapper">
         {% if profile_user.avatar %}
-            <img src="{{ profile_user.avatar.url }}" alt="avatar">
+            <img src="{{ profile_user.avatar.url }}" alt="avatar" class="avatar-profile">
         {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" alt="avatar">
+            <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-profile">
         {% endif %}
     </div>
     <p><strong>Статус:</strong> {{ profile_user.get_manual_status_display }}</p>
     <p><strong>О себе:</strong> {{ profile_user.bio|default:"не указано" }}</p>
     {% if are_friends %}
         <p><span style="color: var(--neon);">★ Вы в друзьях</span></p>
-        <!-- Ссылка на личный чат (можно добавить позже) -->
-        <a href="#" class="btn btn-primary">Написать сообщение</a>
+        <!-- Получаем или создаём личный чат -->
+        <a href="{% url 'chat:room' profile_user.id %}" class="btn btn-primary">Написать сообщение</a>
     {% else %}
         <p><span style="color: #ff5555;">✗ Не в друзьях</span></p>
         <a href="{% url 'users:add_friend' %}" class="btn btn-secondary">Добавить в друзья</a>

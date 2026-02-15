@@ -3,11 +3,11 @@
 {% block content %}
 <div class="profile">
     <h2>Мой профиль</h2>
-    <div class="avatar-large">
+    <div class="avatar-wrapper">
         {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" alt="avatar">
+            <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-profile">
         {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" alt="avatar">
+            <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-profile">
         {% endif %}
     </div>
     <p><strong>Никнейм:</strong> {{ user.get_display_name }}</p>

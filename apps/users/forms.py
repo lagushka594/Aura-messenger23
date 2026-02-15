@@ -44,3 +44,42 @@ class AddFriendForm(forms.Form):
         if self.user == friend:
             raise forms.ValidationError('Нельзя добавить самого себя')
         return friend
+
+# Формы для настроек
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(widget=forms.PasswordInput, label='Старый пароль')
+    new_password1 = forms.CharField(widget=forms.PasswordInput, label='Новый пароль')
+    new_password2 = forms.CharField(widget=forms.PasswordInput, label='Подтвердите новый пароль')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        p1 = cleaned_data.get('new_password1')
+        p2 = cleaned_data.get('new_password2')
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError('Новые пароли не совпадают')
+        return cleaned_data
+
+class ChangeEmailForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['email']
+        labels = {'email': 'Новый email'}
+
+class ChangeUsernameForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username']
+        labels = {'username': 'Новый никнейм'}
+
+class ChangeBioForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['bio']
+        labels = {'bio': 'О себе'}
+        widgets = {'bio': forms.Textarea(attrs={'rows': 3})}
+
+class ChangeStatusForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['manual_status']
+        labels = {'manual_status': 'Статус'}

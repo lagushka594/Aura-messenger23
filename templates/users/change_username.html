@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="form-container">
+    <h2>Изменение никнейма</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+            <div class="form-errors">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <p style="color: red;">{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+    <p><a href="{% url 'users:settings' %}">← Назад к настройкам</a></p>
+</div>
+{% endblock %}

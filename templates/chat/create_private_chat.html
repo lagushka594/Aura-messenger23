@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="form-container">
+    <h2>Создать личный чат</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+            <div class="form-errors">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <p style="color: red;">{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Создать чат</button>
+    </form>
+    <p><a href="{% url 'chat:create_chat' %}">← Назад</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="create-chat-menu">
+    <h2>Создать новый чат</h2>
+    <div class="menu-options">
+        <a href="{% url 'chat:create_group' %}" class="menu-option btn">Создать группу</a>
+        <a href="{% url 'chat:create_private_chat' %}" class="menu-option btn">Создать личный чат</a>
+    </div>
+    <p><a href="{% url 'chat:index' %}">← Назад к чатам</a></p>
+</div>
+{% endblock %}

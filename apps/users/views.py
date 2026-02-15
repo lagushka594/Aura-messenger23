@@ -1,10 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.http import Http404
 from .models import User, Friendship
-from .forms import UserRegistrationForm, LoginForm, AddFriendForm
+from .forms import (
+    UserRegistrationForm, LoginForm, AddFriendForm,
+    ChangePasswordForm, ChangeEmailForm, ChangeUsernameForm,
+    ChangeBioForm, ChangeStatusForm
+)
 from apps.chat.models import Conversation
 
 def register_view(request):
@@ -86,7 +91,6 @@ def handle_request(request, friendship_id, action):
     if action == 'accept':
         friendship.status = 'accepted'
         friendship.save()
-        # Создаём или получаем личный чат
         conv, created = Conversation.objects.get_or_create_private(request.user, friendship.from_user)
         messages.success(request, 'Заявка принята')
     elif action == 'reject':
@@ -107,3 +111,75 @@ def user_profile(request, user_id):
         'are_friends': are_friends,
     }
     return render(request, 'users/user_profile.html', context)
+
+# Настройки
+@login_required
+def settings_view(request):
+    return render(request, 'users/settings.html')
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.POST)
+        if form.is_valid():
+            old_password = form.cleaned_data['old_password']
+            new_password = form.cleaned_data['new_password1']
+            if request.user.check_password(old_password):
+                request.user.set_password(new_password)
+                request.user.save()
+                update_session_auth_hash(request, request.user)  # сохраняем сессию
+                messages.success(request, 'Пароль изменён')
+                return redirect('users:settings')
+            else:
+                form.add_error('old_password', 'Неверный старый пароль')
+    else:
+        form = ChangePasswordForm()
+    return render(request, 'users/change_password.html', {'form': form})
+
+@login_required
+def change_email(request):
+    if request.method == 'POST':
+        form = ChangeEmailForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Email изменён')
+            return redirect('users:settings')
+    else:
+        form = ChangeEmailForm(instance=request.user)
+    return render(request, 'users/change_email.html', {'form': form})
+
+@login_required
+def change_username(request):
+    if request.method == 'POST':
+        form = ChangeUsernameForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Никнейм изменён')
+            return redirect('users:settings')
+    else:
+        form = ChangeUsernameForm(instance=request.user)
+    return render(request, 'users/change_username.html', {'form': form})
+
+@login_required
+def change_bio(request):
+    if request.method == 'POST':
+        form = ChangeBioForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Описание изменено')
+            return redirect('users:settings')
+    else:
+        form = ChangeBioForm(instance=request.user)
+    return render(request, 'users/change_bio.html', {'form': form})
+
+@login_required
+def change_status(request):
+    if request.method == 'POST':
+        form = ChangeStatusForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Статус изменён')
+            return redirect('users:settings')
+    else:
+        form = ChangeStatusForm(instance=request.user)
+    return render(request, 'users/change_status.html', {'form': form})
