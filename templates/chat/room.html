@@ -12,7 +12,7 @@
             {% if conversation.type == 'group' and is_admin %}
                 <button class="btn btn-secondary" id="invite-btn">🔗 Пригласить</button>
             {% endif %}
-            <a href="{% url 'chat:delete_chat' conversation.id %}" class="btn btn-danger" onclick="return confirm('Удалить этот чат?')">🗑️ Удалить</a>
+            <!-- Кнопка удаления убрана -->
         </div>
     </div>
 

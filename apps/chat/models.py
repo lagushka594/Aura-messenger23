@@ -36,8 +36,6 @@ class ConversationParticipant(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
     last_read = models.DateTimeField(null=True, blank=True)
     is_admin = models.BooleanField(default=False)
-    # Удалено поле is_pinned
-    deleted = models.BooleanField(default=False)     # удалён ли для пользователя (скрыт)
 
     class Meta:
         unique_together = ('user', 'conversation')

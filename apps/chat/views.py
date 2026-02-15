@@ -11,10 +11,9 @@ import secrets
 
 @login_required
 def index(request):
-    # Показываем только не удалённые чаты, сортируем по последнему сообщению (новые сверху)
+    # Показываем все чаты, в которых участвует пользователь (без фильтра по deleted)
     conversations = Conversation.objects.filter(
-        participants=request.user,
-        conversationparticipant__deleted=False
+        participants=request.user
     ).annotate(
         last_msg_content=Subquery(
             Message.objects.filter(conversation=OuterRef('pk')).order_by('-timestamp').values('content')[:1]
@@ -40,16 +39,11 @@ def room(request, conversation_id):
         except User.DoesNotExist:
             raise Http404("Чат не найден")
     
-    # Помечаем сообщения как прочитанные
     Message.objects.filter(conversation=conversation).exclude(sender=request.user).update(is_read=True)
-    
     messages_list = Message.objects.filter(conversation=conversation).select_related('sender').order_by('timestamp')
-    
-    # Получаем информацию об участнике (для проверки прав)
     participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
     is_admin = participant.is_admin or conversation.type == 'private'
     
-    # Получаем приглашения (если группа)
     invites = None
     if conversation.type == 'group' and is_admin:
         invites = conversation.invites.all()
@@ -119,22 +113,13 @@ def create_private_chat(request):
         form = CreatePrivateChatForm()
     return render(request, 'chat/create_private_chat.html', {'form': form})
 
-# --- Действия с чатами ---
-
-@login_required
-def delete_chat(request, conversation_id):
-    """Удалить чат (скрыть для пользователя)"""
-    participant = get_object_or_404(ConversationParticipant, user=request.user, conversation_id=conversation_id)
-    participant.deleted = True
-    participant.save()
-    messages.success(request, 'Чат удалён')
-    return redirect('chat:index')
+# --- Действия с чатами (удалено) ---
+# Функция delete_chat удалена, так как кнопка удаления больше не нужна
 
 # --- Приглашения ---
 
 @login_required
 def create_invite(request, conversation_id):
-    """Создать приглашение в группу"""
     conversation = get_object_or_404(Conversation, id=conversation_id, type='group')
     participant = get_object_or_404(ConversationParticipant, user=request.user, conversation=conversation)
     if not participant.is_admin:
@@ -156,7 +141,6 @@ def create_invite(request, conversation_id):
 
 @login_required
 def join_via_invite(request, token):
-    """Присоединиться к группе по приглашению"""
     invite = get_object_or_404(Invite, token=token)
     if invite.expires_at and invite.expires_at < timezone.now():
         messages.error(request, 'Срок действия приглашения истёк')
