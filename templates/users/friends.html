@@ -3,12 +3,12 @@
 {% block content %}
 <div class="friends">
     <h2>Мои друзья</h2>
-    <a href="{% url 'users:add_friend' %}">➕ Добавить друга</a>
+    <a href="{% url 'users:add_friend' %}" class="btn btn-primary">➕ Добавить друга</a>
     <ul>
         {% for friend in friends %}
         <li>
             <img src="{% if friend.avatar %}{{ friend.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-tiny">
-            {{ friend.get_display_name }}
+            <a href="{% url 'users:user_profile' friend.id %}" class="friend-name">{{ friend.get_display_name }}</a>
             <span class="status {{ friend.manual_status }}" data-user-id="{{ friend.id }}"></span>
         </li>
         {% empty %}

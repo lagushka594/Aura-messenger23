@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.db.models import Q
 from .models import User, Friendship
 from .forms import UserRegistrationForm, LoginForm, AddFriendForm
+from apps.chat.models import Conversation
 
 def register_view(request):
     if request.method == 'POST':
@@ -66,7 +67,7 @@ def add_friend(request):
     if request.method == 'POST':
         form = AddFriendForm(request.POST, user=request.user)
         if form.is_valid():
-            friend = form.cleaned_data['friend_id']  # Исправлено: friend -> friend_id
+            friend = form.cleaned_data['friend_id']
             if Friendship.objects.filter(
                 (Q(from_user=request.user, to_user=friend) | Q(from_user=friend, to_user=request.user))
             ).exists():
@@ -85,9 +86,36 @@ def handle_request(request, friendship_id, action):
     if action == 'accept':
         friendship.status = 'accepted'
         friendship.save()
+        conv, created = Conversation.objects.get_or_create_private(request.user, friendship.from_user)
         messages.success(request, 'Заявка принята')
     elif action == 'reject':
         friendship.status = 'rejected'
         friendship.save()
         messages.success(request, 'Заявка отклонена')
     return redirect('users:friend_requests')
+
+# Новое представление для просмотра профиля другого пользователя
+@login_required
+def user_profile(request, user_id):
+    profile_user = get_object_or_404(User, id=user_id)
+    # Проверяем, является ли пользователь другом (необязательно, можно разрешить всем видеть)
+    are_friends = Friendship.objects.filter(
+        (Q(from_user=request.user, to_user=profile_user) | Q(from_user=profile_user, to_user=request.user)),
+        status='accepted'
+    ).exists()
+    context = {
+        'profile_user': profile_user,
+        'are_friends': are_friends,
+    }
+    return render(request, 'users/user_profile.html', context)
+
+# Новое представление для смены обоев
+@login_required
+def update_wallpaper(request):
+    if request.method == 'POST' and request.FILES.get('wallpaper'):
+        request.user.chat_wallpaper = request.FILES['wallpaper']
+        request.user.save()
+        messages.success(request, 'Обои обновлены')
+    else:
+        messages.error(request, 'Файл не выбран')
+    return redirect('users:profile')

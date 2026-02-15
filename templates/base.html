@@ -29,10 +29,10 @@
             {% if user.is_authenticated %}
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="{% url 'chat:index' %}">Чаты</a></li>
-                    <li><a href="{% url 'users:friends' %}">Друзья</a></li>
-                    <li><a href="{% url 'users:friend_requests' %}">Заявки</a></li>
-                    <li><a href="{% url 'users:profile' %}">Профиль</a></li>
+                    <li><a href="{% url 'chat:index' %}">💬 Сообщения</a></li>
+                    <li><a href="{% url 'users:friends' %}">👥 Контакты</a></li>
+                    <li><a href="{% url 'users:friend_requests' %}">📨 Заявки</a></li>
+                    <li><a href="{% url 'users:profile' %}">⚙️ Мой профиль</a></li>
                 </ul>
             </nav>
 
@@ -41,12 +41,12 @@
                     <span class="user-name">{{ user.get_display_name }}</span>
                     <span class="user-status {{ user.manual_status }}">{{ user.get_manual_status_display }}</span>
                 </div>
-                <a href="{% url 'users:logout' %}" class="logout-btn">Выйти</a>
+                <a href="{% url 'users:logout' %}" class="logout-btn">🚪 Выйти</a>
             </div>
             {% else %}
             <div class="sidebar-footer">
-                <a href="{% url 'users:login' %}" class="login-btn">Войти</a>
-                <a href="{% url 'users:register' %}" class="register-btn">Регистрация</a>
+                <a href="{% url 'users:login' %}" class="login-btn">🔑 Войти</a>
+                <a href="{% url 'users:register' %}" class="register-btn">📝 Регистрация</a>
             </div>
             {% endif %}
         </aside>

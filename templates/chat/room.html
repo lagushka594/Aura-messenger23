@@ -2,8 +2,23 @@
 {% load static %}
 {% block content %}
 <div class="chat-room">
+    <style>
+        .chat-area {
+            background-image: url('{% if user.chat_wallpaper %}{{ user.chat_wallpaper.url }}{% else %}{% static 'images/default-wallpaper.jpg' %}{% endif %}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .message-bubble {
+            background-color: rgba(30, 31, 37, 0.9);
+            backdrop-filter: blur(5px);
+        }
+        .message.own .message-bubble {
+            background-color: rgba(114, 137, 218, 0.9);
+        }
+    </style>
     <div class="chat-header">
-        <img src="{% static 'images/default-avatar.png' %}" class="avatar-small">
+        <img src="{% if conversation.participants.first.avatar %}{{ conversation.participants.first.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-small">
         <div class="chat-header-info">
             <h4>{{ conversation.name|default:'Личный чат' }}</h4>
             <p>участников: {{ conversation.participants.count }}</p>
@@ -36,7 +51,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         initChatSocket(conversationId);
-        // Прокрутка вниз
         const msgList = document.getElementById('message-list');
         if (msgList) msgList.scrollTop = msgList.scrollHeight;
     });

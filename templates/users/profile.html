@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="profile">
-    <h2>Профиль {{ user.get_display_name }}</h2>
+    <h2>Мой профиль</h2>
     <div class="avatar-large">
         {% if user.avatar %}
             <img src="{{ user.avatar.url }}" alt="avatar">
@@ -10,11 +10,23 @@
             <img src="{% static 'images/default-avatar.png' %}" alt="avatar">
         {% endif %}
     </div>
+    <p><strong>Никнейм:</strong> {{ user.get_display_name }}</p>
     <p><strong>Email:</strong> {{ user.email }}</p>
     <p><strong>О себе:</strong> {{ user.bio|default:"не указано" }}</p>
-    <p><strong>Статус:</strong> {{ user.get_manual_status_display }}</p>
+    <p><strong>Текущий статус:</strong> {{ user.get_manual_status_display }}</p>
     <p><strong>Последняя активность:</strong> {{ user.last_activity }}</p>
-    <a href="{% url 'users:friends' %}">Друзья</a>
-    <a href="{% url 'users:friend_requests' %}">Заявки в друзья</a>
+
+    <h3>Настройки чата</h3>
+    <form method="post" enctype="multipart/form-data" action="{% url 'users:update_wallpaper' %}">
+        {% csrf_token %}
+        <label for="wallpaper">Выберите обои для фона чата:</label>
+        <input type="file" name="wallpaper" id="wallpaper" accept="image/*">
+        <button type="submit" class="btn btn-primary">Загрузить обои</button>
+    </form>
+
+    <div class="profile-actions">
+        <a href="{% url 'users:friends' %}" class="btn">Друзья</a>
+        <a href="{% url 'users:friend_requests' %}" class="btn">Заявки в друзья</a>
+    </div>
 </div>
 {% endblock %}
