@@ -1,4 +1,4 @@
-/* ===== Переменные темы ===== */
+/* ===== Переменные темы (основная палитра) ===== */
 :root {
     --primary: #7289DA;
     --accent-1: #8A66FF;
@@ -20,7 +20,7 @@
     --link-color: var(--neon);
 }
 
-/* Светлая тема */
+/* ===== Светлая тема ===== */
 body.light-theme {
     --primary: #7289DA;
     --accent-1: #8A66FF;
@@ -42,6 +42,7 @@ body.light-theme {
     --link-color: var(--accent-2);
 }
 
+/* ===== Базовые сбросы ===== */
 * {
     margin: 0;
     padding: 0;
@@ -63,7 +64,7 @@ body {
     width: 100%;
 }
 
-/* ===== Боковая панель ===== */
+/* ===== Боковая панель (сайдбар) ===== */
 .sidebar {
     width: 280px;
     background-color: var(--sidebar-bg);
@@ -148,6 +149,102 @@ body {
     margin-right: 4px;
 }
 
+/* ===== Переключатель темы в сайдбаре ===== */
+.theme-switcher {
+    margin: 10px 0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-switcher button {
+    flex: 1;
+    padding: 8px 12px;
+    background-color: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-switcher button.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.theme-switcher button:hover {
+    background-color: var(--button-hover);
+    color: white;
+}
+
+/* ===== ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ КНОПОК ===== */
+.btn,
+.login-btn,
+.register-btn,
+.logout-btn,
+button[type="submit"],
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.menu-option,
+a.btn,
+a.login-btn,
+a.register-btn,
+a.logout-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    text-decoration: none;
+    border-radius: 8px;
+    border: var(--button-border);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
+    text-align: center;
+    line-height: 1.2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn:hover,
+.login-btn:hover,
+.register-btn:hover,
+.logout-btn:hover,
+button[type="submit"]:hover,
+.btn-primary:hover,
+.menu-option:hover,
+a.btn:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-danger {
+    background-color: #ff5555;
+    border: none;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #ff3333;
+}
+
+/* ===== Аватарки ===== */
 .avatar-small {
     width: 40px;
     height: 40px;
@@ -170,7 +267,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* ===== Основная область ===== */
+/* ===== Основная область контента ===== */
 .chat-area {
     flex: 1;
     display: flex;
@@ -179,7 +276,7 @@ body {
     transition: background-color 0.2s;
 }
 
-/* ===== Список чатов ===== */
+/* ===== Список чатов (как в Telegram) ===== */
 .conversation-list {
     list-style: none;
     padding: 0;
@@ -250,11 +347,6 @@ body {
     gap: 12px;
 }
 
-.chat-header .avatar-small {
-    width: 40px;
-    height: 40px;
-}
-
 .chat-header-info h4 {
     font-size: 1rem;
     font-weight: 600;
@@ -301,7 +393,6 @@ body {
     padding: 8px 12px;
     border-radius: 18px 18px 18px 4px;
     word-wrap: break-word;
-    position: relative;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
@@ -378,6 +469,7 @@ body {
     background-color: var(--button-hover);
 }
 
+/* ===== Эмодзи-пикер ===== */
 .emoji-button {
     background: none !important;
     background-color: transparent !important;
@@ -418,89 +510,8 @@ body {
     transform: scale(1.2);
 }
 
-/* ===== Единый стиль для ВСЕХ кнопок ===== */
-.btn, .login-btn, .register-btn, .logout-btn, button[type="submit"], 
-.btn-primary, .btn-secondary, .btn-danger, .menu-option,
-a.btn, a.login-btn, a.register-btn, a.logout-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: var(--button-bg);
-    color: var(--button-text);
-    text-decoration: none;
-    border-radius: 8px;
-    border: var(--button-border);
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.2s, transform 0.1s;
-    text-align: center;
-    line-height: 1.2;
-    font-weight: 500;
-}
-
-.btn:hover, .login-btn:hover, .register-btn:hover, .logout-btn:hover, 
-button[type="submit"]:hover, .btn-primary:hover, .menu-option:hover,
-a.btn:hover {
-    background-color: var(--button-hover);
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background-color: transparent;
-    border: 1px solid var(--button-bg);
-    color: var(--button-bg);
-}
-
-.btn-secondary:hover {
-    background-color: var(--button-bg);
-    color: var(--button-text);
-    border-color: var(--button-bg);
-}
-
-.btn-danger {
-    background-color: #ff5555;
-    border: none;
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #ff3333;
-}
-
-/* Переключатель темы */
-.theme-switcher {
-    margin: 10px 0;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.theme-switcher button {
-    flex: 1;
-    padding: 8px 12px;
-    background-color: var(--hover-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.theme-switcher button.active {
-    background-color: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-.theme-switcher button:hover {
-    background-color: var(--button-hover);
-    color: white;
-}
-
-/* ===== Навигационные ссылки "Назад" ===== */
+/* ===== Ссылки "назад" (обычные, не кнопки) ===== */
 .back-link {
-    display: inline-block;
-    margin-top: 15px;
     color: var(--link-color);
     text-decoration: none;
     font-size: 0.95rem;
@@ -536,7 +547,7 @@ a.btn:hover {
     color: var(--text-primary);
 }
 
-.form-container button {
+.form-container button[type="submit"] {
     width: 100%;
     margin-top: 10px;
 }
@@ -546,7 +557,7 @@ a.btn:hover {
     color: #ff5555;
 }
 
-/* ===== Прочие страницы ===== */
+/* ===== Заголовок страницы чатов с кнопкой создания ===== */
 .chat-index-header {
     display: flex;
     justify-content: space-between;
@@ -562,6 +573,7 @@ a.btn:hover {
     font-size: 1.5rem;
 }
 
+/* ===== Меню создания чата ===== */
 .create-chat-menu {
     text-align: center;
     padding: 40px;
@@ -583,9 +595,25 @@ a.btn:hover {
     min-width: 200px;
 }
 
+/* ===== Стили для страниц друзей и заявок ===== */
+.friends, .friend-requests, .profile {
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: var(--sidebar-bg);
+    border-radius: 16px;
+    margin-top: 20px;
+}
+
+.friends h2, .friend-requests h2, .profile h2 {
+    color: var(--neon);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
 .friends ul, .friend-requests ul {
     list-style: none;
-    padding: 0;
 }
 
 .friends li, .friend-requests li {
@@ -612,7 +640,43 @@ a.btn:hover {
 .status.idle { background-color: #FAA81A; }
 .status.offline { background-color: #747F8D; }
 
-/* ===== Мобильное меню ===== */
+/* ===== Настройки ===== */
+.settings-list {
+    list-style: none;
+    padding: 0;
+}
+
+.settings-list li {
+    margin: 10px 0;
+}
+
+.settings-list a {
+    width: 100%;
+    text-align: left;
+}
+
+/* ===== Профиль ===== */
+.avatar-wrapper {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.avatar-large {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary);
+}
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* ===== Мобильная кнопка меню ===== */
 .mobile-menu-toggle {
     display: none;
     background: var(--primary);
@@ -633,6 +697,7 @@ a.btn:hover {
     justify-content: center;
 }
 
+/* ===== Адаптивность для мобильных ===== */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
@@ -667,5 +732,9 @@ a.btn:hover {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+    }
+
+    .profile-actions {
+        flex-direction: column;
     }
 }
