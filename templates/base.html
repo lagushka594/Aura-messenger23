@@ -6,6 +6,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Aura Messenger</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        /* Прямоугольные кнопки с закругленными углами, как поле ввода */
+        .btn, button, input[type="submit"], a.btn, .login-btn, .register-btn, .logout-btn, .btn-primary, .btn-secondary, .menu-option {
+            display: inline-block !important;
+            padding: 12px 24px !important;
+            background-color: #7289DA !important;
+            color: white !important;
+            text-decoration: none !important;
+            border: none !important;
+            border-radius: 12px !important;
+            cursor: pointer !important;
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            text-align: center !important;
+            line-height: 1.2 !important;
+            transition: background-color 0.2s !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+            margin: 4px 0 !important;
+        }
+        .btn:hover, button:hover, input[type="submit"]:hover, a.btn:hover, .login-btn:hover, .register-btn:hover, .logout-btn:hover, .btn-primary:hover, .menu-option:hover {
+            background-color: #8A66FF !important;
+        }
+        .btn-secondary {
+            background-color: transparent !important;
+            border: 2px solid #7289DA !important;
+            color: #7289DA !important;
+        }
+        .btn-secondary:hover {
+            background-color: #7289DA !important;
+            color: white !important;
+        }
+        /* Кнопка "Назад к ..." оставляем ссылкой */
+        .back-link {
+            color: #00F5A8 !important;
+            text-decoration: none !important;
+        }
+        .back-link:hover {
+            text-decoration: underline !important;
+        }
+        /* Поле ввода сообщения (оставляем как есть) */
+        .message-input textarea {
+            border-radius: 12px !important;
+            padding: 12px 16px !important;
+        }
+    </style>
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
@@ -29,18 +74,18 @@
             {% if user.is_authenticated %}
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="{% url 'chat:index' %}">💬 Чаты</a></li>
-                    <li><a href="{% url 'users:friends' %}">👥 Контакты</a></li>
-                    <li><a href="{% url 'users:friend_requests' %}">📨 Заявки</a></li>
-                    <li><a href="{% url 'users:profile' %}">⚙️ Профиль</a></li>
-                    <li><a href="{% url 'users:settings' %}">🔧 Настройки</a></li>
+                    <li><a href="{% url 'chat:index' %}" class="btn">💬 Чаты</a></li>
+                    <li><a href="{% url 'users:friends' %}" class="btn">👥 Контакты</a></li>
+                    <li><a href="{% url 'users:friend_requests' %}" class="btn">📨 Заявки</a></li>
+                    <li><a href="{% url 'users:profile' %}" class="btn">⚙️ Профиль</a></li>
+                    <li><a href="{% url 'users:settings' %}" class="btn">🔧 Настройки</a></li>
                 </ul>
             </nav>
 
-            <!-- Переключатель темы -->
+            <!-- Переключатель темы (тоже кнопки) -->
             <div class="theme-switcher">
-                <button id="theme-dark" class="active">🌙 Тёмная</button>
-                <button id="theme-light">☀️ Светлая</button>
+                <button id="theme-dark" class="btn">🌙 Тёмная</button>
+                <button id="theme-light" class="btn">☀️ Светлая</button>
             </div>
 
             <div class="sidebar-footer">
@@ -48,12 +93,12 @@
                     <span class="user-name">{{ user.get_display_name }}</span>
                     <span class="user-status {{ user.manual_status }}">{{ user.get_manual_status_display }}</span>
                 </div>
-                <a href="{% url 'users:logout' %}" class="logout-btn">🚪 Выйти</a>
+                <a href="{% url 'users:logout' %}" class="btn">🚪 Выйти</a>
             </div>
             {% else %}
             <div class="sidebar-footer">
-                <a href="{% url 'users:login' %}" class="login-btn">🔑 Войти</a>
-                <a href="{% url 'users:register' %}" class="register-btn">📝 Регистрация</a>
+                <a href="{% url 'users:login' %}" class="btn">🔑 Войти</a>
+                <a href="{% url 'users:register' %}" class="btn">📝 Регистрация</a>
             </div>
             {% endif %}
         </aside>
@@ -68,41 +113,7 @@
     <script src="{% static 'js/websocket.js' %}"></script>
     <script src="{% static 'js/emoji-picker.js' %}"></script>
     <script>
-        // Переключение темы и сохранение в localStorage
         document.addEventListener('DOMContentLoaded', function() {
-            const body = document.body;
-            const darkBtn = document.getElementById('theme-dark');
-            const lightBtn = document.getElementById('theme-light');
-
-            // Применить сохранённую тему
-            const savedTheme = localStorage.getItem('aura-theme');
-            if (savedTheme === 'light') {
-                body.classList.add('light-theme');
-                if (lightBtn) lightBtn.classList.add('active');
-                if (darkBtn) darkBtn.classList.remove('active');
-            } else {
-                // по умолчанию тёмная
-                body.classList.remove('light-theme');
-                if (darkBtn) darkBtn.classList.add('active');
-                if (lightBtn) lightBtn.classList.remove('active');
-            }
-
-            if (darkBtn && lightBtn) {
-                darkBtn.addEventListener('click', function() {
-                    body.classList.remove('light-theme');
-                    localStorage.setItem('aura-theme', 'dark');
-                    darkBtn.classList.add('active');
-                    lightBtn.classList.remove('active');
-                });
-                lightBtn.addEventListener('click', function() {
-                    body.classList.add('light-theme');
-                    localStorage.setItem('aura-theme', 'light');
-                    lightBtn.classList.add('active');
-                    darkBtn.classList.remove('active');
-                });
-            }
-
-            // Мобильное меню
             const menuToggle = document.getElementById('mobile-menu-toggle');
             const sidebar = document.getElementById('sidebar');
             if (menuToggle && sidebar) {
@@ -114,6 +125,19 @@
                     if (sidebar.classList.contains('open')) {
                         sidebar.classList.remove('open');
                     }
+                });
+            }
+
+            // Переключение темы (пример, можно дополнить)
+            const darkBtn = document.getElementById('theme-dark');
+            const lightBtn = document.getElementById('theme-light');
+            const body = document.body;
+            if (darkBtn && lightBtn) {
+                darkBtn.addEventListener('click', () => {
+                    body.classList.remove('light-theme');
+                });
+                lightBtn.addEventListener('click', () => {
+                    body.classList.add('light-theme');
                 });
             }
         });
