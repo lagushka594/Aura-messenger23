@@ -115,7 +115,7 @@ def user_profile(request, user_id):
 # Настройки
 @login_required
 def settings_view(request):
-    return render(request, 'users/settings.html')
+    return render(request, 'users/settings.html', {'user': request.user})
 
 @login_required
 def change_password(request):
@@ -127,7 +127,7 @@ def change_password(request):
             if request.user.check_password(old_password):
                 request.user.set_password(new_password)
                 request.user.save()
-                update_session_auth_hash(request, request.user)  # сохраняем сессию
+                update_session_auth_hash(request, request.user)
                 messages.success(request, 'Пароль изменён')
                 return redirect('users:settings')
             else:
