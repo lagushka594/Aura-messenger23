@@ -36,8 +36,7 @@ class ConversationParticipant(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
     last_read = models.DateTimeField(null=True, blank=True)
     is_admin = models.BooleanField(default=False)
-    # Новые поля
-    is_pinned = models.BooleanField(default=False)   # закреплён ли чат
+    # Удалено поле is_pinned
     deleted = models.BooleanField(default=False)     # удалён ли для пользователя (скрыт)
 
     class Meta:
@@ -59,8 +58,8 @@ class Invite(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     token = models.CharField(max_length=64, unique=True, default=secrets.token_urlsafe)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True, blank=True)  # можно добавить срок действия
-    max_uses = models.IntegerField(default=0)  # 0 = безлимитно
+    expires_at = models.DateTimeField(null=True, blank=True)
+    max_uses = models.IntegerField(default=0)
     uses = models.IntegerField(default=0)
 
     def __str__(self):

@@ -16,10 +16,7 @@
                     <img src="{% static 'images/default-avatar.png' %}" class="avatar-small">
                 {% endif %}
                 <div class="conversation-info">
-                    <span class="conversation-name">
-                        {% if conv.is_pinned %}📌 {% endif %}
-                        {{ conv.name|default:'Личный чат' }}
-                    </span>
+                    <span class="conversation-name">{{ conv.name|default:'Личный чат' }}</span>
                     <span class="last-message">{{ conv.last_msg_content|truncatechars:30 }}</span>
                 </div>
                 {% if conv.last_message %}

@@ -7,25 +7,19 @@ from django.utils import timezone
 from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite
 from apps.users.models import User
 from .forms import CreateGroupForm, CreatePrivateChatForm
+import secrets
 
 @login_required
 def index(request):
-    # Показываем только не удалённые чаты, сортируем: сначала закреплённые, потом по последнему сообщению
+    # Показываем только не удалённые чаты, сортируем по последнему сообщению (новые сверху)
     conversations = Conversation.objects.filter(
         participants=request.user,
         conversationparticipant__deleted=False
     ).annotate(
         last_msg_content=Subquery(
             Message.objects.filter(conversation=OuterRef('pk')).order_by('-timestamp').values('content')[:1]
-        ),
-        is_pinned=Subquery(
-            ConversationParticipant.objects.filter(
-                user=request.user,
-                conversation=OuterRef('pk')
-            ).values('is_pinned')[:1]
         )
     ).order_by(
-        F('is_pinned').desc(),
         F('last_message__timestamp').desc(nulls_last=True)
     ).select_related('last_message')
     
@@ -53,7 +47,7 @@ def room(request, conversation_id):
     
     # Получаем информацию об участнике (для проверки прав)
     participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
-    is_admin = participant.is_admin or conversation.type == 'private'  # в личных чатах все админы
+    is_admin = participant.is_admin or conversation.type == 'private'
     
     # Получаем приглашения (если группа)
     invites = None
@@ -128,14 +122,6 @@ def create_private_chat(request):
 # --- Действия с чатами ---
 
 @login_required
-def pin_chat(request, conversation_id):
-    """Закрепить/открепить чат"""
-    participant = get_object_or_404(ConversationParticipant, user=request.user, conversation_id=conversation_id)
-    participant.is_pinned = not participant.is_pinned
-    participant.save()
-    return redirect('chat:index')
-
-@login_required
 def delete_chat(request, conversation_id):
     """Удалить чат (скрыть для пользователя)"""
     participant = get_object_or_404(ConversationParticipant, user=request.user, conversation_id=conversation_id)
@@ -160,7 +146,6 @@ def create_invite(request, conversation_id):
         created_by=request.user,
         token=secrets.token_urlsafe(32)
     )
-    # Возвращаем JSON для модального окна
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
             'token': invite.token,
@@ -180,12 +165,10 @@ def join_via_invite(request, token):
         messages.error(request, 'Приглашение уже использовано максимальное количество раз')
         return redirect('chat:index')
     
-    # Проверяем, не состоит ли уже пользователь
     if invite.conversation.participants.filter(id=request.user.id).exists():
         messages.info(request, 'Вы уже участник этого чата')
         return redirect('chat:room', conversation_id=invite.conversation.id)
     
-    # Добавляем пользователя
     invite.conversation.participants.add(request.user)
     invite.uses += 1
     invite.save()

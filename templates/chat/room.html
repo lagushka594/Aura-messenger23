@@ -12,9 +12,6 @@
             {% if conversation.type == 'group' and is_admin %}
                 <button class="btn btn-secondary" id="invite-btn">🔗 Пригласить</button>
             {% endif %}
-            <a href="{% url 'chat:pin_chat' conversation.id %}" class="btn btn-secondary">
-                {% if participant.is_pinned %}📌 Открепить{% else %}📌 Закрепить{% endif %}
-            </a>
             <a href="{% url 'chat:delete_chat' conversation.id %}" class="btn btn-danger" onclick="return confirm('Удалить этот чат?')">🗑️ Удалить</a>
         </div>
     </div>
