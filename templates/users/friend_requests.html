@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="friend-requests">
+    <h2>Заявки в друзья</h2>
+    <h3>Входящие</h3>
+    <ul>
+        {% for req in incoming %}
+        <li>
+            {{ req.from_user.get_display_name }}
+            <a href="{% url 'users:handle_request' req.id 'accept' %}">Принять</a>
+            <a href="{% url 'users:handle_request' req.id 'reject' %}">Отклонить</a>
+        </li>
+        {% empty %}
+        <li>Нет входящих заявок.</li>
+        {% endfor %}
+    </ul>
+    <h3>Исходящие</h3>
+    <ul>
+        {% for req in outgoing %}
+        <li>{{ req.to_user.get_display_name }} (ожидание)</li>
+        {% empty %}
+        <li>Нет исходящих заявок.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

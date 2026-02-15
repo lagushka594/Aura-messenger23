@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="profile">
+    <h2>Профиль {{ user.get_display_name }}</h2>
+    <div class="avatar-large">
+        {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="avatar">
+        {% else %}
+            <img src="{% static 'images/default-avatar.png' %}" alt="avatar">
+        {% endif %}
+    </div>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>О себе:</strong> {{ user.bio|default:"не указано" }}</p>
+    <p><strong>Статус:</strong> {{ user.get_manual_status_display }}</p>
+    <p><strong>Последняя активность:</strong> {{ user.last_activity }}</p>
+    <a href="{% url 'users:friends' %}">Друзья</a>
+    <a href="{% url 'users:friend_requests' %}">Заявки в друзья</a>
+</div>
+{% endblock %}

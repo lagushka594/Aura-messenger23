@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Messenger</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Aura</div>
+        {% if user.is_authenticated %}
+        <div class="user-menu">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-small">
+            {% else %}
+                <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-small">
+            {% endif %}
+            <span>{{ user.get_display_name }}</span>
+            <a href="{% url 'users:profile' %}">Профиль</a>
+            <a href="{% url 'users:friends' %}">Друзья</a>
+            <a href="{% url 'users:logout' %}">Выйти</a>
+        </div>
+        {% endif %}
+    </header>
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
+    <script src="{% static 'js/websocket.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

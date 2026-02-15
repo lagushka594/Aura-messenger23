@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="friends">
+    <h2>Мои друзья</h2>
+    <a href="{% url 'users:add_friend' %}">➕ Добавить друга</a>
+    <ul>
+        {% for friend in friends %}
+        <li>
+            <img src="{{ friend.avatar.url|default:'/static/images/default-avatar.png' }}" class="avatar-tiny">
+            {{ friend.get_display_name }}
+            <span class="status" data-user-id="{{ friend.id }}">...</span>
+        </li>
+        {% empty %}
+        <li>У вас пока нет друзей.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
