@@ -16,17 +16,9 @@
     <p><strong>Текущий статус:</strong> {{ user.get_manual_status_display }}</p>
     <p><strong>Последняя активность:</strong> {{ user.last_activity }}</p>
 
-    <h3>Настройки чата</h3>
-    <form method="post" enctype="multipart/form-data" action="{% url 'users:update_wallpaper' %}">
-        {% csrf_token %}
-        <label for="wallpaper">Выберите обои для фона чата:</label>
-        <input type="file" name="wallpaper" id="wallpaper" accept="image/*">
-        <button type="submit" class="btn btn-primary">Загрузить обои</button>
-    </form>
-
     <div class="profile-actions">
-        <a href="{% url 'users:friends' %}" class="btn">Друзья</a>
-        <a href="{% url 'users:friend_requests' %}" class="btn">Заявки в друзья</a>
+        <a href="{% url 'users:friends' %}" class="btn">👥 Друзья</a>
+        <a href="{% url 'users:friend_requests' %}" class="btn">📨 Заявки</a>
     </div>
 </div>
 {% endblock %}

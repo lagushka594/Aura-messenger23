@@ -86,6 +86,7 @@ def handle_request(request, friendship_id, action):
     if action == 'accept':
         friendship.status = 'accepted'
         friendship.save()
+        # Создаём или получаем личный чат
         conv, created = Conversation.objects.get_or_create_private(request.user, friendship.from_user)
         messages.success(request, 'Заявка принята')
     elif action == 'reject':
@@ -94,11 +95,9 @@ def handle_request(request, friendship_id, action):
         messages.success(request, 'Заявка отклонена')
     return redirect('users:friend_requests')
 
-# Новое представление для просмотра профиля другого пользователя
 @login_required
 def user_profile(request, user_id):
     profile_user = get_object_or_404(User, id=user_id)
-    # Проверяем, является ли пользователь другом (необязательно, можно разрешить всем видеть)
     are_friends = Friendship.objects.filter(
         (Q(from_user=request.user, to_user=profile_user) | Q(from_user=profile_user, to_user=request.user)),
         status='accepted'
@@ -108,14 +107,3 @@ def user_profile(request, user_id):
         'are_friends': are_friends,
     }
     return render(request, 'users/user_profile.html', context)
-
-# Новое представление для смены обоев
-@login_required
-def update_wallpaper(request):
-    if request.method == 'POST' and request.FILES.get('wallpaper'):
-        request.user.chat_wallpaper = request.FILES['wallpaper']
-        request.user.save()
-        messages.success(request, 'Обои обновлены')
-    else:
-        messages.error(request, 'Файл не выбран')
-    return redirect('users:profile')

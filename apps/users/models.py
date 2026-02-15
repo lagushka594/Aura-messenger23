@@ -23,8 +23,6 @@ class User(AbstractUser):
         default='offline'
     )
     last_activity = models.DateTimeField(auto_now=True)
-    # Новое поле для обоев чата
-    chat_wallpaper = models.ImageField(upload_to='wallpapers/', blank=True, null=True)
 
     def get_display_name(self):
         return f'{self.username}#{self.discriminator}'
