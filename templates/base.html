@@ -37,6 +37,12 @@
                 </ul>
             </nav>
 
+            <!-- Переключатель темы -->
+            <div class="theme-switcher">
+                <button id="theme-dark" class="active">🌙 Тёмная</button>
+                <button id="theme-light">☀️ Светлая</button>
+            </div>
+
             <div class="sidebar-footer">
                 <div class="user-info">
                     <span class="user-name">{{ user.get_display_name }}</span>
@@ -62,7 +68,41 @@
     <script src="{% static 'js/websocket.js' %}"></script>
     <script src="{% static 'js/emoji-picker.js' %}"></script>
     <script>
+        // Переключение темы и сохранение в localStorage
         document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
+            const darkBtn = document.getElementById('theme-dark');
+            const lightBtn = document.getElementById('theme-light');
+
+            // Применить сохранённую тему
+            const savedTheme = localStorage.getItem('aura-theme');
+            if (savedTheme === 'light') {
+                body.classList.add('light-theme');
+                if (lightBtn) lightBtn.classList.add('active');
+                if (darkBtn) darkBtn.classList.remove('active');
+            } else {
+                // по умолчанию тёмная
+                body.classList.remove('light-theme');
+                if (darkBtn) darkBtn.classList.add('active');
+                if (lightBtn) lightBtn.classList.remove('active');
+            }
+
+            if (darkBtn && lightBtn) {
+                darkBtn.addEventListener('click', function() {
+                    body.classList.remove('light-theme');
+                    localStorage.setItem('aura-theme', 'dark');
+                    darkBtn.classList.add('active');
+                    lightBtn.classList.remove('active');
+                });
+                lightBtn.addEventListener('click', function() {
+                    body.classList.add('light-theme');
+                    localStorage.setItem('aura-theme', 'light');
+                    lightBtn.classList.add('active');
+                    darkBtn.classList.remove('active');
+                });
+            }
+
+            // Мобильное меню
             const menuToggle = document.getElementById('mobile-menu-toggle');
             const sidebar = document.getElementById('sidebar');
             if (menuToggle && sidebar) {

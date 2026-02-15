@@ -5,9 +5,9 @@
     <h2>{{ profile_user.get_display_name }}</h2>
     <div class="avatar-wrapper">
         {% if profile_user.avatar %}
-            <img src="{{ profile_user.avatar.url }}" alt="avatar" class="avatar-profile">
+            <img src="{{ profile_user.avatar.url }}" alt="avatar" class="avatar-large">
         {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-profile">
+            <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-large">
         {% endif %}
     </div>
     <p><strong>Статус:</strong> {{ profile_user.get_manual_status_display }}</p>

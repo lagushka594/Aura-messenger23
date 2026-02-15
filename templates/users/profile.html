@@ -5,9 +5,9 @@
     <h2>Мой профиль</h2>
     <div class="avatar-wrapper">
         {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-profile">
+            <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-large">
         {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-profile">
+            <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-large">
         {% endif %}
     </div>
     <p><strong>Никнейм:</strong> {{ user.get_display_name }}</p>

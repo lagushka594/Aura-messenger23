@@ -1,3 +1,4 @@
+/* ===== Переменные темы ===== */
 :root {
     --primary: #7289DA;
     --accent-1: #8A66FF;
@@ -16,6 +17,29 @@
     --button-hover: var(--accent-1);
     --button-text: white;
     --button-border: none;
+    --link-color: var(--neon);
+}
+
+/* Светлая тема */
+body.light-theme {
+    --primary: #7289DA;
+    --accent-1: #8A66FF;
+    --accent-2: #5D4AFF;
+    --neon: #00A86B;
+    --dark-bg: #F0F2F5;
+    --sidebar-bg: #FFFFFF;
+    --chat-bg: #E9EDF2;
+    --message-own-bg: #D0E6FF;
+    --message-other-bg: #FFFFFF;
+    --text-primary: #1E1F25;
+    --text-secondary: #65676B;
+    --border-color: #CED0D4;
+    --hover-bg: #E4E6E9;
+    --button-bg: var(--primary);
+    --button-hover: var(--accent-1);
+    --button-text: white;
+    --button-border: none;
+    --link-color: var(--accent-2);
 }
 
 * {
@@ -30,6 +54,7 @@ body {
     color: var(--text-primary);
     height: 100vh;
     overflow: hidden;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .main {
@@ -38,14 +63,14 @@ body {
     width: 100%;
 }
 
-/* Боковая панель (список чатов/навигация) */
+/* ===== Боковая панель ===== */
 .sidebar {
     width: 280px;
     background-color: var(--sidebar-bg);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, background-color 0.2s;
     overflow-y: auto;
 }
 
@@ -145,15 +170,16 @@ body {
     margin-bottom: 20px;
 }
 
-/* Основная область чата */
+/* ===== Основная область ===== */
 .chat-area {
     flex: 1;
     display: flex;
     flex-direction: column;
     background-color: var(--chat-bg);
+    transition: background-color 0.2s;
 }
 
-/* Список чатов (как в Telegram) */
+/* ===== Список чатов ===== */
 .conversation-list {
     list-style: none;
     padding: 0;
@@ -214,7 +240,7 @@ body {
     padding-left: 8px;
 }
 
-/* Чат-заголовок */
+/* ===== Заголовок чата ===== */
 .chat-header {
     padding: 12px 20px;
     background-color: var(--sidebar-bg);
@@ -241,7 +267,7 @@ body {
     margin: 2px 0 0;
 }
 
-/* Сообщения */
+/* ===== Сообщения ===== */
 .messages {
     flex: 1;
     padding: 20px;
@@ -304,7 +330,7 @@ body {
     align-self: flex-end;
 }
 
-/* Поле ввода сообщения */
+/* ===== Поле ввода сообщения ===== */
 .message-input {
     display: flex;
     padding: 16px 20px;
@@ -352,7 +378,6 @@ body {
     background-color: var(--button-hover);
 }
 
-/* Кнопка для эмодзи */
 .emoji-button {
     background: none !important;
     background-color: transparent !important;
@@ -367,7 +392,6 @@ body {
     background-color: var(--hover-bg) !important;
 }
 
-/* Эмодзи-пикер */
 #emoji-picker {
     position: absolute;
     bottom: 70px;
@@ -394,7 +418,7 @@ body {
     transform: scale(1.2);
 }
 
-/* Единый стиль для всех кнопок (как у входа/регистрации) */
+/* ===== Единый стиль для ВСЕХ кнопок ===== */
 .btn, .login-btn, .register-btn, .logout-btn, button[type="submit"], 
 .btn-primary, .btn-secondary, .btn-danger, .menu-option,
 a.btn, a.login-btn, a.register-btn, a.logout-btn {
@@ -434,17 +458,50 @@ a.btn:hover {
 
 .btn-danger {
     background-color: #ff5555;
+    border: none;
+    color: white;
 }
 
 .btn-danger:hover {
     background-color: #ff3333;
 }
 
-/* Кнопка "Назад к ..." */
+/* Переключатель темы */
+.theme-switcher {
+    margin: 10px 0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-switcher button {
+    flex: 1;
+    padding: 8px 12px;
+    background-color: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-switcher button.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.theme-switcher button:hover {
+    background-color: var(--button-hover);
+    color: white;
+}
+
+/* ===== Навигационные ссылки "Назад" ===== */
 .back-link {
     display: inline-block;
     margin-top: 15px;
-    color: var(--neon);
+    color: var(--link-color);
     text-decoration: none;
     font-size: 0.95rem;
 }
@@ -453,22 +510,7 @@ a.btn:hover {
     text-decoration: underline;
 }
 
-/* Стили для страниц настроек, профиля, друзей */
-.settings-list {
-    list-style: none;
-    padding: 0;
-}
-
-.settings-list li {
-    margin: 10px 0;
-}
-
-.settings-list a {
-    width: 100%;
-    text-align: left;
-}
-
-/* Контейнер форм */
+/* ===== Стили для форм ===== */
 .form-container {
     max-width: 500px;
     margin: 20px auto;
@@ -501,9 +543,10 @@ a.btn:hover {
 
 .form-errors {
     margin-bottom: 15px;
+    color: #ff5555;
 }
 
-/* Заголовок списка чатов с кнопкой создания */
+/* ===== Прочие страницы ===== */
 .chat-index-header {
     display: flex;
     justify-content: space-between;
@@ -519,7 +562,6 @@ a.btn:hover {
     font-size: 1.5rem;
 }
 
-/* Меню создания чата */
 .create-chat-menu {
     text-align: center;
     padding: 40px;
@@ -541,7 +583,6 @@ a.btn:hover {
     min-width: 200px;
 }
 
-/* Список друзей */
 .friends ul, .friend-requests ul {
     list-style: none;
     padding: 0;
@@ -571,7 +612,7 @@ a.btn:hover {
 .status.idle { background-color: #FAA81A; }
 .status.offline { background-color: #747F8D; }
 
-/* Мобильное меню */
+/* ===== Мобильное меню ===== */
 .mobile-menu-toggle {
     display: none;
     background: var(--primary);
@@ -592,7 +633,6 @@ a.btn:hover {
     justify-content: center;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;

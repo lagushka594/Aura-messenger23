@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="auth-form">
+<div class="form-container">
     <h2>Регистрация в Aura</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Зарегистрироваться</button>
+        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
     </form>
-    <p>Уже есть аккаунт? <a href="{% url 'users:login' %}">Войдите</a></p>
+    <p>Уже есть аккаунт? <a href="{% url 'users:login' %}" class="link">Войдите</a></p>
 </div>
 {% endblock %}
