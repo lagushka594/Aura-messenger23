@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
-    <!-- Бургер-кнопка в правом верхнем углу -->
+    <!-- Бургер-кнопка справа -->
     <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Меню">☰</button>
 
     <div class="main">
@@ -69,6 +69,7 @@
     <script src="{% static 'js/emoji-picker.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Мобильное меню
             const menuToggle = document.getElementById('mobile-menu-toggle');
             const sidebar = document.getElementById('sidebar');
             if (menuToggle && sidebar) {
@@ -83,17 +84,31 @@
                 });
             }
 
-            // Переключение темы (можно дополнить сохранением)
+            // Переключение темы с сохранением в localStorage
             const darkBtn = document.getElementById('theme-dark');
             const lightBtn = document.getElementById('theme-light');
             const body = document.body;
-            if (darkBtn && lightBtn) {
-                darkBtn.addEventListener('click', () => {
-                    body.classList.remove('light-theme');
-                });
-                lightBtn.addEventListener('click', () => {
+
+            function setTheme(theme) {
+                if (theme === 'light') {
                     body.classList.add('light-theme');
-                });
+                    if (lightBtn) lightBtn.classList.add('active');
+                    if (darkBtn) darkBtn.classList.remove('active');
+                } else {
+                    body.classList.remove('light-theme');
+                    if (darkBtn) darkBtn.classList.add('active');
+                    if (lightBtn) lightBtn.classList.remove('active');
+                }
+                localStorage.setItem('aura-theme', theme);
+            }
+
+            // Загружаем сохранённую тему
+            const savedTheme = localStorage.getItem('aura-theme') || 'dark';
+            setTheme(savedTheme);
+
+            if (darkBtn && lightBtn) {
+                darkBtn.addEventListener('click', () => setTheme('dark'));
+                lightBtn.addEventListener('click', () => setTheme('light'));
             }
         });
     </script>

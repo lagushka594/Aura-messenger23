@@ -1,5 +1,15 @@
 from django.db import models
 from django.conf import settings
+import secrets
+
+class ConversationManager(models.Manager):
+    def get_or_create_private(self, user1, user2):
+        qs = self.filter(type='private', participants=user1).filter(participants=user2)
+        if qs.exists():
+            return qs.first(), False
+        conv = self.create(type='private')
+        conv.participants.add(user1, user2)
+        return conv, True
 
 class Conversation(models.Model):
     CONV_TYPE = [
@@ -13,6 +23,8 @@ class Conversation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_message = models.ForeignKey('Message', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
 
+    objects = ConversationManager()
+
     def __str__(self):
         if self.type == 'private':
             return f'Private chat {self.id}'
@@ -24,6 +36,9 @@ class ConversationParticipant(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
     last_read = models.DateTimeField(null=True, blank=True)
     is_admin = models.BooleanField(default=False)
+    # Новые поля
+    is_pinned = models.BooleanField(default=False)   # закреплён ли чат
+    deleted = models.BooleanField(default=False)     # удалён ли для пользователя (скрыт)
 
     class Meta:
         unique_together = ('user', 'conversation')
@@ -37,6 +52,19 @@ class Message(models.Model):
 
     def __str__(self):
         return f'{self.sender}: {self.content[:20]}'
+
+class Invite(models.Model):
+    """Приглашение в чат (для групп)"""
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='invites')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    token = models.CharField(max_length=64, unique=True, default=secrets.token_urlsafe)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)  # можно добавить срок действия
+    max_uses = models.IntegerField(default=0)  # 0 = безлимитно
+    uses = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f'Invite to {self.conversation.name} by {self.created_by.username}'
 
 class Server(models.Model):
     name = models.CharField(max_length=100)

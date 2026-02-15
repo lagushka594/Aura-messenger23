@@ -1,25 +1,31 @@
 function initEmojiPicker() {
     const picker = document.getElementById('emoji-picker');
     const textarea = document.getElementById('chat-message');
+    if (!picker || !textarea) return;
+
+    // Расширенный набор эмодзи
+    const emojis = [
+        '😀', '😂', '😍', '😎', '😢', '😡', '👍', '👎', '❤️', '🔥', '✅', '❌',
+        '😊', '🥳', '😇', '🤔', '😴', '🥺', '😱', '🤯', '🥶', '🤗', '🤭', '😏',
+        '🎉', '🎊', '🎂', '🎈', '🎁', '🎀', '🎨', '🎭', '🎤', '🎧', '🎸', '🥁',
+        '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐸', '🐒', '🐔',
+        '🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍒', '🍑',
+        '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🥊', '🥋',
+        '📱', '💻', '⌨️', '🖥️', '🖨️', '📷', '📹', '🎥', '📞', '📟', '📠', '🔋'
+    ];
+
+    // Создаём кнопку для открытия пикера
     const emojiButton = document.createElement('button');
     emojiButton.innerHTML = '😊';
     emojiButton.type = 'button';
-    emojiButton.style.background = 'none';
-    emojiButton.style.fontSize = '1.5rem';
-    emojiButton.style.width = '44px';
-    emojiButton.style.height = '44px';
-    emojiButton.style.borderRadius = '50%';
-    emojiButton.style.border = 'none';
-    emojiButton.style.cursor = 'pointer';
+    emojiButton.className = 'emoji-button';
+    textarea.parentNode.insertBefore(emojiButton, textarea.nextSibling);
+
     emojiButton.addEventListener('click', () => {
         picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
     });
 
-    // Вставить кнопку рядом с полем ввода (после textarea)
-    textarea.parentNode.insertBefore(emojiButton, textarea.nextSibling);
-
-    // Простой набор эмодзи
-    const emojis = ['😀', '😂', '😍', '😎', '😢', '😡', '👍', '👎', '❤️', '🔥', '✅', '❌'];
+    // Заполняем пикер
     emojis.forEach(e => {
         const span = document.createElement('span');
         span.textContent = e;
@@ -28,5 +34,12 @@ function initEmojiPicker() {
             picker.style.display = 'none';
         });
         picker.appendChild(span);
+    });
+
+    // Закрывать при клике вне пикера
+    document.addEventListener('click', (e) => {
+        if (!picker.contains(e.target) && e.target !== emojiButton) {
+            picker.style.display = 'none';
+        }
     });
 }
