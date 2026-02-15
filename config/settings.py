@@ -10,18 +10,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Разрешённые хосты – добавляем ваш домен и локальные для разработки
 ALLOWED_HOSTS = [
-    'aura-messenger.up.railway.app',      # ваш основной домен
-    'web-production-b3f5d.up.railway.app', # если старый ещё используется (можно удалить)
+    'aura-messenger.up.railway.app',
+    'web-production-b3f5d.up.railway.app',
     'localhost',
     '127.0.0.1',
 ]
 
-# Доверенные источники для CSRF (обязательно для HTTPS)
 CSRF_TRUSTED_ORIGINS = [
-    'https://aura-messenger.up.railway.app',   # ваш домен с https
-    'http://aura-messenger.up.railway.app',    # если вдруг http (не обязательно)
+    'https://aura-messenger.up.railway.app',
+    'http://aura-messenger.up.railway.app',
 ]
 
 INSTALLED_APPS = [
@@ -72,7 +70,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
-# База данных
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -90,7 +87,6 @@ db_from_env = dj_database_url.config(conn_max_age=500)
 if db_from_env:
     DATABASES['default'].update(db_from_env)
 
-# Валидация паролей
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -109,7 +105,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Channels (Redis)
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -119,9 +114,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-# Кастомная модель пользователя
 AUTH_USER_MODEL = 'users.User'
-
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 

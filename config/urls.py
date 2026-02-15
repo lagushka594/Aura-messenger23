@@ -7,7 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('apps.users.urls')),
     path('chat/', include('apps.chat.urls')),
-    path('', include('apps.chat.urls')),  # корень ведёт в чат
+    path('', include('apps.chat.urls')),
 ]
 
 if settings.DEBUG:

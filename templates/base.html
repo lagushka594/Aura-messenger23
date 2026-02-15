@@ -3,33 +3,80 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Aura Messenger</title>
-    {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
-    <header class="header">
-        <div class="logo">Aura</div>
-        {% if user.is_authenticated %}
-        <div class="user-menu">
-            {% if user.avatar %}
-                <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-small">
+    <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Меню">☰</button>
+
+    <div class="main">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Aura</h3>
+                {% if user.is_authenticated %}
+                <a href="{% url 'users:profile' %}" class="user-avatar-link">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-small">
+                    {% else %}
+                        <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-small">
+                    {% endif %}
+                </a>
+                {% endif %}
+            </div>
+
+            {% if user.is_authenticated %}
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="{% url 'chat:index' %}">Чаты</a></li>
+                    <li><a href="{% url 'users:friends' %}">Друзья</a></li>
+                    <li><a href="{% url 'users:friend_requests' %}">Заявки</a></li>
+                    <li><a href="{% url 'users:profile' %}">Профиль</a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span class="user-name">{{ user.get_display_name }}</span>
+                    <span class="user-status {{ user.manual_status }}">{{ user.get_manual_status_display }}</span>
+                </div>
+                <a href="{% url 'users:logout' %}" class="logout-btn">Выйти</a>
+            </div>
             {% else %}
-                <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-small">
+            <div class="sidebar-footer">
+                <a href="{% url 'users:login' %}" class="login-btn">Войти</a>
+                <a href="{% url 'users:register' %}" class="register-btn">Регистрация</a>
+            </div>
             {% endif %}
-            <span>{{ user.get_display_name }}</span>
-            <a href="{% url 'users:profile' %}">Профиль</a>
-            <a href="{% url 'users:friends' %}">Друзья</a>
-            <a href="{% url 'users:logout' %}">Выйти</a>
-        </div>
-        {% endif %}
-    </header>
-    <main class="main">
-        {% block content %}{% endblock %}
-    </main>
-    <script src="{% static 'js/websocket.js' %}"></script>
+        </aside>
+
+        <main class="chat-area">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
     <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/websocket.js' %}"></script>
+    <script src="{% static 'js/emoji-picker.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('open');
+                });
+                document.querySelector('.chat-area').addEventListener('click', function() {
+                    if (sidebar.classList.contains('open')) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            }
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

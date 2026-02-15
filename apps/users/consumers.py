@@ -15,8 +15,6 @@ class StatusConsumer(AsyncWebsocketConsumer):
         else:
             self.user_group_name = f'user_{self.user.id}'
             await self.channel_layer.group_add(self.user_group_name, self.channel_name)
-
-            # Устанавливаем статус онлайн (если не невидимка)
             if self.user.manual_status != 'invisible':
                 await self.set_online_status(True)
             await self.accept()

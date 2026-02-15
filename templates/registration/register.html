@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
 {% block content %}
 <div class="auth-form">
     <h2>Регистрация в Aura</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form|crispy }}
+        {{ form.as_p }}
         <button type="submit">Зарегистрироваться</button>
     </form>
     <p>Уже есть аккаунт? <a href="{% url 'users:login' %}">Войдите</a></p>

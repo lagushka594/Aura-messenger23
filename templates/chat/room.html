@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="chat-room">
+    <div class="chat-header">
+        <img src="{% static 'images/default-avatar.png' %}" class="avatar-small">
+        <div class="chat-header-info">
+            <h4>{{ conversation.name|default:'Личный чат' }}</h4>
+            <p>участников: {{ conversation.participants.count }}</p>
+        </div>
+    </div>
+    <div class="messages" id="message-list">
+        {% for message in messages %}
+        <div class="message {% if message.sender == user %}own{% endif %}" id="msg-{{ message.id }}">
+            <img src="{% if message.sender.avatar %}{{ message.sender.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-tiny">
+            <div class="message-bubble">
+                <span class="message-sender">{{ message.sender.get_display_name }}</span>
+                <div class="message-content">{{ message.content }}</div>
+                <span class="message-time">{{ message.timestamp|time:"H:i" }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="message-input">
+        <textarea id="chat-message" placeholder="Введите сообщение..."></textarea>
+        <button id="send-message">➤</button>
+        <div id="emoji-picker"></div>
+    </div>
+</div>
+<script>
+    const conversationId = {{ conversation.id }};
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initChatSocket(conversationId);
+        // Прокрутка вниз
+        const msgList = document.getElementById('message-list');
+        if (msgList) msgList.scrollTop = msgList.scrollHeight;
+    });
+</script>
+{% endblock %}

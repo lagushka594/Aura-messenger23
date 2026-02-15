@@ -44,6 +44,3 @@ class AddFriendForm(forms.Form):
         if self.user == friend:
             raise forms.ValidationError('Нельзя добавить самого себя')
         return friend
-
-class HandleFriendRequestForm(forms.Form):
-    action = forms.ChoiceField(choices=[('accept', 'Принять'), ('reject', 'Отклонить')])

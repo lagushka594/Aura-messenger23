@@ -42,4 +42,3 @@ class Friendship(models.Model):
 
     class Meta:
         unique_together = ('from_user', 'to_user')
-        # CheckConstraint убран для совместимости с MySQL

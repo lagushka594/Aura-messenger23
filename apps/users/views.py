@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 from .models import User, Friendship
-from .forms import UserRegistrationForm, LoginForm, AddFriendForm, HandleFriendRequestForm
+from .forms import UserRegistrationForm, LoginForm, AddFriendForm
 
 def register_view(request):
     if request.method == 'POST':
@@ -40,7 +40,6 @@ def profile_view(request):
 
 @login_required
 def friends_list(request):
-    # Получаем список принятых друзей
     friendships = Friendship.objects.filter(
         (Q(from_user=request.user) | Q(to_user=request.user)),
         status='accepted'
@@ -55,9 +54,7 @@ def friends_list(request):
 
 @login_required
 def friend_requests(request):
-    # Входящие заявки (где to_user=request.user и status='pending')
     incoming = Friendship.objects.filter(to_user=request.user, status='pending').select_related('from_user')
-    # Исходящие заявки (где from_user=request.user и status='pending')
     outgoing = Friendship.objects.filter(from_user=request.user, status='pending').select_related('to_user')
     return render(request, 'users/friend_requests.html', {
         'incoming': incoming,
@@ -70,7 +67,6 @@ def add_friend(request):
         form = AddFriendForm(request.POST, user=request.user)
         if form.is_valid():
             friend = form.cleaned_data['friend']
-            # Проверяем, нет ли уже заявки
             if Friendship.objects.filter(
                 (Q(from_user=request.user, to_user=friend) | Q(from_user=friend, to_user=request.user))
             ).exists():

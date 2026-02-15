@@ -3,7 +3,7 @@ channels==4.0.0
 channels-redis==4.1.0
 pymysql==1.1.0
 redis==5.0.0
-Pillow==11.1.0          # обновлено
+Pillow==11.1.0
 django-crispy-forms==2.0
 crispy-bootstrap5==0.7
 python-dotenv==1.0.0

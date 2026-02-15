@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h1>Сервер: {{ server.name }}</h1>
+<p>Каналы:</p>
+<ul>
+    {% for channel in channels %}
+    <li><a href="{% url 'chat:channel' channel.id %}">{{ channel.name }} ({{ channel.type }})</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
