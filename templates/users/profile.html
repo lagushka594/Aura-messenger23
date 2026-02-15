@@ -17,8 +17,9 @@
     <p><strong>Последняя активность:</strong> {{ user.last_activity }}</p>
 
     <div class="profile-actions">
-        <a href="{% url 'users:friends' %}" class="btn">👥 Друзья</a>
-        <a href="{% url 'users:friend_requests' %}" class="btn">📨 Заявки</a>
+        <a href="{% url 'users:friends' %}" class="btn btn-primary">👥 Друзья</a>
+        <a href="{% url 'users:friend_requests' %}" class="btn btn-primary">📨 Заявки</a>
+        <a href="{% url 'users:settings' %}" class="btn btn-primary">⚙️ Настройки</a>
     </div>
 </div>
 {% endblock %}

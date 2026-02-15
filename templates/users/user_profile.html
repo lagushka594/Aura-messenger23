@@ -14,12 +14,11 @@
     <p><strong>О себе:</strong> {{ profile_user.bio|default:"не указано" }}</p>
     {% if are_friends %}
         <p><span style="color: var(--neon);">★ Вы в друзьях</span></p>
-        <!-- Получаем или создаём личный чат -->
         <a href="{% url 'chat:room' profile_user.id %}" class="btn btn-primary">Написать сообщение</a>
     {% else %}
         <p><span style="color: #ff5555;">✗ Не в друзьях</span></p>
         <a href="{% url 'users:add_friend' %}" class="btn btn-secondary">Добавить в друзья</a>
     {% endif %}
-    <p><a href="{% url 'users:friends' %}">← К списку друзей</a></p>
+    <p><a href="{% url 'users:friends' %}" class="back-link">← К списку друзей</a></p>
 </div>
 {% endblock %}

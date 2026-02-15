@@ -12,6 +12,10 @@
     --text-secondary: #B0B3B8;
     --border-color: #3A3C43;
     --hover-bg: #3A3C43;
+    --button-bg: var(--primary);
+    --button-hover: var(--accent-1);
+    --button-text: white;
+    --button-border: none;
 }
 
 * {
@@ -34,7 +38,7 @@ body {
     width: 100%;
 }
 
-/* Боковая панель */
+/* Боковая панель (список чатов/навигация) */
 .sidebar {
     width: 280px;
     background-color: var(--sidebar-bg);
@@ -65,7 +69,9 @@ body {
 }
 
 .sidebar-nav li a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 12px 16px;
     color: var(--text-primary);
     text-decoration: none;
@@ -117,23 +123,6 @@ body {
     margin-right: 4px;
 }
 
-.logout-btn, .login-btn, .register-btn {
-    display: block;
-    text-align: center;
-    padding: 8px;
-    background-color: var(--primary);
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    margin-top: 8px;
-}
-
-.login-btn, .register-btn {
-    background-color: transparent;
-    border: 1px solid var(--primary);
-    color: var(--primary);
-}
-
 .avatar-small {
     width: 40px;
     height: 40px;
@@ -149,14 +138,14 @@ body {
 }
 
 .avatar-large {
-    width: 120px;
-    height: 120px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 20px;
 }
 
-/* Основная область */
+/* Основная область чата */
 .chat-area {
     flex: 1;
     display: flex;
@@ -164,6 +153,68 @@ body {
     background-color: var(--chat-bg);
 }
 
+/* Список чатов (как в Telegram) */
+.conversation-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.conversation-list li {
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.conversation-list li:hover {
+    background-color: var(--hover-bg);
+}
+
+.conversation-list a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.conversation-list .avatar-small {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.conversation-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.conversation-name {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.last-message {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conversation-time {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+    padding-left: 8px;
+}
+
+/* Чат-заголовок */
 .chat-header {
     padding: 12px 20px;
     background-color: var(--sidebar-bg);
@@ -171,6 +222,11 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.chat-header .avatar-small {
+    width: 40px;
+    height: 40px;
 }
 
 .chat-header-info h4 {
@@ -185,6 +241,7 @@ body {
     margin: 2px 0 0;
 }
 
+/* Сообщения */
 .messages {
     flex: 1;
     padding: 20px;
@@ -207,6 +264,9 @@ body {
 }
 
 .message .avatar-tiny {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     align-self: flex-end;
 }
 
@@ -233,6 +293,10 @@ body {
     display: block;
 }
 
+.message-content {
+    line-height: 1.4;
+}
+
 .message-time {
     font-size: 0.7rem;
     color: var(--text-secondary);
@@ -240,6 +304,7 @@ body {
     align-self: flex-end;
 }
 
+/* Поле ввода сообщения */
 .message-input {
     display: flex;
     padding: 16px 20px;
@@ -269,8 +334,8 @@ body {
 }
 
 .message-input button {
-    background-color: var(--primary);
-    border: none;
+    background-color: var(--button-bg);
+    border: var(--button-border);
     border-radius: 50%;
     width: 44px;
     height: 44px;
@@ -279,12 +344,27 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: background 0.2s;
-    color: white;
+    color: var(--button-text);
     font-size: 1.2rem;
 }
 
 .message-input button:hover {
-    background-color: var(--accent-1);
+    background-color: var(--button-hover);
+}
+
+/* Кнопка для эмодзи */
+.emoji-button {
+    background: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    font-size: 1.5rem;
+    width: 44px;
+    height: 44px;
+    color: var(--text-secondary) !important;
+}
+
+.emoji-button:hover {
+    background-color: var(--hover-bg) !important;
 }
 
 /* Эмодзи-пикер */
@@ -314,7 +394,184 @@ body {
     transform: scale(1.2);
 }
 
-/* Кнопка мобильного меню */
+/* Единый стиль для всех кнопок (как у входа/регистрации) */
+.btn, .login-btn, .register-btn, .logout-btn, button[type="submit"], 
+.btn-primary, .btn-secondary, .btn-danger, .menu-option,
+a.btn, a.login-btn, a.register-btn, a.logout-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    text-decoration: none;
+    border-radius: 8px;
+    border: var(--button-border);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s, transform 0.1s;
+    text-align: center;
+    line-height: 1.2;
+    font-weight: 500;
+}
+
+.btn:hover, .login-btn:hover, .register-btn:hover, .logout-btn:hover, 
+button[type="submit"]:hover, .btn-primary:hover, .menu-option:hover,
+a.btn:hover {
+    background-color: var(--button-hover);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid var(--button-bg);
+    color: var(--button-bg);
+}
+
+.btn-secondary:hover {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border-color: var(--button-bg);
+}
+
+.btn-danger {
+    background-color: #ff5555;
+}
+
+.btn-danger:hover {
+    background-color: #ff3333;
+}
+
+/* Кнопка "Назад к ..." */
+.back-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: var(--neon);
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Стили для страниц настроек, профиля, друзей */
+.settings-list {
+    list-style: none;
+    padding: 0;
+}
+
+.settings-list li {
+    margin: 10px 0;
+}
+
+.settings-list a {
+    width: 100%;
+    text-align: left;
+}
+
+/* Контейнер форм */
+.form-container {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: var(--sidebar-bg);
+    border-radius: 16px;
+}
+
+.form-container h2 {
+    color: var(--neon);
+    margin-bottom: 20px;
+}
+
+.form-container input,
+.form-container textarea,
+.form-container select {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 15px;
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
+.form-container button {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.form-errors {
+    margin-bottom: 15px;
+}
+
+/* Заголовок списка чатов с кнопкой создания */
+.chat-index-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-index-header h1 {
+    margin: 0;
+    color: var(--neon);
+    font-size: 1.5rem;
+}
+
+/* Меню создания чата */
+.create-chat-menu {
+    text-align: center;
+    padding: 40px;
+}
+
+.create-chat-menu h2 {
+    color: var(--neon);
+    margin-bottom: 30px;
+}
+
+.menu-options {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.menu-option {
+    min-width: 200px;
+}
+
+/* Список друзей */
+.friends ul, .friend-requests ul {
+    list-style: none;
+    padding: 0;
+}
+
+.friends li, .friend-requests li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.friends li:last-child, .friend-requests li:last-child {
+    border-bottom: none;
+}
+
+.status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 8px;
+}
+
+.status.online { background-color: #3BA55D; }
+.status.idle { background-color: #FAA81A; }
+.status.offline { background-color: #747F8D; }
+
+/* Мобильное меню */
 .mobile-menu-toggle {
     display: none;
     background: var(--primary);
@@ -365,225 +622,10 @@ body {
     .message {
         max-width: 85%;
     }
-}
 
-/* Страницы аутентификации */
-.auth-form {
-    max-width: 400px;
-    margin: 5vh auto;
-    padding: 2rem;
-    background-color: var(--sidebar-bg);
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-.auth-form h2 {
-    color: var(--neon);
-    margin-bottom: 1.5rem;
-    text-align: center;
-}
-
-.auth-form input,
-.auth-form textarea {
-    width: 100%;
-    background-color: var(--dark-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 12px;
-    color: var(--text-primary);
-    outline: none;
-    margin-bottom: 12px;
-}
-
-.auth-form button {
-    width: 100%;
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.auth-form button:hover {
-    background-color: var(--accent-1);
-}
-
-.auth-form p {
-    text-align: center;
-    margin-top: 1rem;
-    color: var(--text-secondary);
-}
-
-.auth-form a {
-    color: var(--neon);
-    text-decoration: none;
-}
-
-/* Друзья, профиль */
-.friends, .friend-requests, .add-friend, .profile {
-    padding: 20px;
-    max-width: 600px;
-    margin: 0 auto;
-    background-color: var(--sidebar-bg);
-    border-radius: 16px;
-    margin-top: 20px;
-}
-
-.friends h2, .friend-requests h2, .add-friend h2, .profile h2 {
-    color: var(--neon);
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
-}
-
-.friends ul, .friend-requests ul {
-    list-style: none;
-}
-
-.friends li, .friend-requests li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.friends li:last-child, .friend-requests li:last-child {
-    border-bottom: none;
-}
-
-.status {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 8px;
-}
-
-.status.online { background-color: #3BA55D; }
-.status.idle { background-color: #FAA81A; }
-.status.offline { background-color: #747F8D; }
-/* Профиль - исправление размера аватара */
-.avatar-wrapper {
-    text-align: center;
-    margin: 20px 0;
-}
-
-.avatar-profile {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--primary);
-}
-
-/* Стили для кнопок (единый стиль как у login/register) */
-.btn, .login-btn, .register-btn, .logout-btn, button[type="submit"], .btn-primary, .btn-secondary {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: var(--primary);
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.2s;
-    text-align: center;
-}
-
-.btn:hover, .login-btn:hover, .register-btn:hover, .logout-btn:hover, button[type="submit"]:hover, .btn-primary:hover {
-    background-color: var(--accent-1);
-}
-
-.btn-secondary {
-    background-color: transparent;
-    border: 1px solid var(--primary);
-    color: var(--primary);
-}
-
-.btn-secondary:hover {
-    background-color: var(--primary);
-    color: white;
-}
-
-/* Список настроек */
-.settings-list {
-    list-style: none;
-    padding: 0;
-}
-
-.settings-list li {
-    margin: 10px 0;
-}
-
-/* Формы */
-.form-container {
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: var(--sidebar-bg);
-    border-radius: 16px;
-}
-
-.form-container h2 {
-    color: var(--neon);
-    margin-bottom: 20px;
-}
-
-.form-container input,
-.form-container textarea,
-.form-container select {
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0 15px;
-    background-color: var(--dark-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-primary);
-}
-
-.form-container button {
-    width: 100%;
-    margin-top: 10px;
-}
-
-/* Заголовок чатов */
-.chat-index-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: var(--sidebar-bg);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.chat-index-header h1 {
-    margin: 0;
-    color: var(--neon);
-}
-
-/* Меню создания */
-.create-chat-menu {
-    text-align: center;
-    padding: 40px;
-}
-
-.create-chat-menu h2 {
-    color: var(--neon);
-    margin-bottom: 30px;
-}
-
-.menu-options {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.menu-option {
-    min-width: 200px;
+    .chat-index-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
 }

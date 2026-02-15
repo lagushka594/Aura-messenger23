@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="add-friend">
+<div class="form-container">
     <h2>Добавить друга по ID</h2>
     <form method="post">
         {% csrf_token %}
@@ -15,7 +15,8 @@
             </div>
         {% endif %}
         {{ form.as_p }}
-        <button type="submit">Отправить заявку</button>
+        <button type="submit" class="btn btn-primary">Отправить заявку</button>
     </form>
+    <p><a href="{% url 'users:friends' %}" class="back-link">← К списку друзей</a></p>
 </div>
 {% endblock %}

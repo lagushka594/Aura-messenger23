@@ -19,10 +19,13 @@
                     <span class="conversation-name">{{ conv.name|default:'Личный чат' }}</span>
                     <span class="last-message">{{ conv.last_msg_content|truncatechars:30 }}</span>
                 </div>
+                {% if conv.last_message %}
+                <span class="conversation-time">{{ conv.last_message.timestamp|time:"H:i" }}</span>
+                {% endif %}
             </a>
         </li>
         {% empty %}
-        <li>У вас пока нет чатов. Создайте новый!</li>
+        <li style="text-align: center; padding: 20px;">У вас пока нет чатов. Создайте новый!</li>
         {% endfor %}
     </ul>
 </div>

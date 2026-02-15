@@ -9,16 +9,27 @@ from .forms import CreateGroupForm, CreatePrivateChatForm
 
 @login_required
 def index(request):
-    conversations = Conversation.objects.filter(participants=request.user).annotate(
-        last_msg_content=Subquery(
-            Message.objects.filter(conversation=OuterRef('pk')).order_by('-timestamp').values('content')[:1]
-        )
-    ).order_by('-last_message__timestamp')
+    """
+    Главная страница чатов. Показывает все беседы пользователя,
+    с последним сообщением и временем.
+    """
+    conversations = Conversation.objects.filter(participants=request.user) \
+        .select_related('last_message') \
+        .annotate(
+            last_msg_content=Subquery(
+                Message.objects.filter(conversation=OuterRef('pk'))
+                .order_by('-timestamp')
+                .values('content')[:1]
+            )
+        ).order_by('-last_message__timestamp')
     return render(request, 'chat/index.html', {'conversations': conversations})
 
 @login_required
 def room(request, conversation_id):
-    # Проверяем, может conversation_id на самом деле является user_id?
+    """
+    Комната чата. Если conversation_id на самом деле является ID пользователя,
+    то создаём (или получаем) приватный чат с этим пользователем.
+    """
     try:
         conversation = Conversation.objects.get(id=conversation_id, participants=request.user)
     except Conversation.DoesNotExist:
@@ -32,7 +43,9 @@ def room(request, conversation_id):
             return redirect('chat:room', conversation_id=conversation.id)
         except User.DoesNotExist:
             raise Http404("Чат не найден")
-    messages_list = Message.objects.filter(conversation=conversation).select_related('sender').order_by('timestamp')
+    messages_list = Message.objects.filter(conversation=conversation) \
+        .select_related('sender') \
+        .order_by('timestamp')
     messages_list.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
     return render(request, 'chat/room.html', {
         'conversation': conversation,
@@ -41,12 +54,18 @@ def room(request, conversation_id):
 
 @login_required
 def server_detail(request, server_id):
+    """
+    Детальная страница сервера (для будущей реализации).
+    """
     server = get_object_or_404(Server, id=server_id, members=request.user)
     channels = server.channels.all().order_by('position')
     return render(request, 'chat/server.html', {'server': server, 'channels': channels})
 
 @login_required
 def channel_detail(request, channel_id):
+    """
+    Детальная страница канала (для будущей реализации).
+    """
     channel = get_object_or_404(Channel, id=channel_id, server__members=request.user)
     return render(request, 'chat/channel.html', {'channel': channel})
 
@@ -59,6 +78,7 @@ def create_chat(request):
 
 @login_required
 def create_group(request):
+    """Создание новой группы."""
     if request.method == 'POST':
         form = CreateGroupForm(request.POST, request.FILES)
         if form.is_valid():
@@ -74,6 +94,7 @@ def create_group(request):
 
 @login_required
 def create_private_chat(request):
+    """Создание нового личного чата по ID друга."""
     if request.method == 'POST':
         form = CreatePrivateChatForm(request.POST)
         if form.is_valid():

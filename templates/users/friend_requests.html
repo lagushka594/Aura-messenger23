@@ -8,8 +8,8 @@
         {% for req in incoming %}
         <li>
             {{ req.from_user.get_display_name }}
-            <a href="{% url 'users:handle_request' req.id 'accept' %}">Принять</a>
-            <a href="{% url 'users:handle_request' req.id 'reject' %}">Отклонить</a>
+            <a href="{% url 'users:handle_request' req.id 'accept' %}" class="btn btn-primary">Принять</a>
+            <a href="{% url 'users:handle_request' req.id 'reject' %}" class="btn btn-secondary">Отклонить</a>
         </li>
         {% empty %}
         <li>Нет входящих заявок.</li>
@@ -23,5 +23,6 @@
         <li>Нет исходящих заявок.</li>
         {% endfor %}
     </ul>
+    <p><a href="{% url 'users:friends' %}" class="back-link">← К списку друзей</a></p>
 </div>
 {% endblock %}
