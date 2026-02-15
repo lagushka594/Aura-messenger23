@@ -6,54 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Aura Messenger</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <style>
-        /* Прямоугольные кнопки с закругленными углами, как поле ввода */
-        .btn, button, input[type="submit"], a.btn, .login-btn, .register-btn, .logout-btn, .btn-primary, .btn-secondary, .menu-option {
-            display: inline-block !important;
-            padding: 12px 24px !important;
-            background-color: #7289DA !important;
-            color: white !important;
-            text-decoration: none !important;
-            border: none !important;
-            border-radius: 12px !important;
-            cursor: pointer !important;
-            font-size: 1rem !important;
-            font-weight: 500 !important;
-            text-align: center !important;
-            line-height: 1.2 !important;
-            transition: background-color 0.2s !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
-            margin: 4px 0 !important;
-        }
-        .btn:hover, button:hover, input[type="submit"]:hover, a.btn:hover, .login-btn:hover, .register-btn:hover, .logout-btn:hover, .btn-primary:hover, .menu-option:hover {
-            background-color: #8A66FF !important;
-        }
-        .btn-secondary {
-            background-color: transparent !important;
-            border: 2px solid #7289DA !important;
-            color: #7289DA !important;
-        }
-        .btn-secondary:hover {
-            background-color: #7289DA !important;
-            color: white !important;
-        }
-        /* Кнопка "Назад к ..." оставляем ссылкой */
-        .back-link {
-            color: #00F5A8 !important;
-            text-decoration: none !important;
-        }
-        .back-link:hover {
-            text-decoration: underline !important;
-        }
-        /* Поле ввода сообщения (оставляем как есть) */
-        .message-input textarea {
-            border-radius: 12px !important;
-            padding: 12px 16px !important;
-        }
-    </style>
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
+    <!-- Кнопка бургер-меню в правом верхнем углу -->
     <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Меню">☰</button>
 
     <div class="main">
@@ -82,7 +38,7 @@
                 </ul>
             </nav>
 
-            <!-- Переключатель темы (тоже кнопки) -->
+            <!-- Переключатель темы -->
             <div class="theme-switcher">
                 <button id="theme-dark" class="btn">🌙 Тёмная</button>
                 <button id="theme-light" class="btn">☀️ Светлая</button>
@@ -128,7 +84,7 @@
                 });
             }
 
-            // Переключение темы (пример, можно дополнить)
+            // Переключение темы (можно дополнить логикой сохранения)
             const darkBtn = document.getElementById('theme-dark');
             const lightBtn = document.getElementById('theme-light');
             const body = document.body;

@@ -11,6 +11,8 @@
     --text-secondary: #b0b3b8;
     --border-color: #3A3C43;
     --hover-bg: #3A3C43;
+    --input-bg: #2B2D33;
+    --input-focus: var(--primary);
 }
 
 /* ===== Базовые сбросы ===== */
@@ -42,6 +44,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    transition: transform 0.3s ease;
 }
 
 .sidebar-header {
@@ -63,6 +66,10 @@ body {
     padding: 8px 0;
 }
 
+.sidebar-nav li {
+    margin: 8px 0; /* увеличенное расстояние между пунктами меню */
+}
+
 .sidebar-nav li a {
     display: block;
     padding: 12px 16px;
@@ -70,7 +77,7 @@ body {
     text-decoration: none;
     transition: background 0.2s;
     border-radius: 8px;
-    margin: 2px 8px;
+    margin: 0 8px;
 }
 
 .sidebar-nav li a:hover {
@@ -78,6 +85,38 @@ body {
     color: var(--neon);
 }
 
+/* ===== Переключатель темы ===== */
+.theme-switcher {
+    margin: 15px 0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 15px; /* увеличенный отступ между кнопками */
+}
+
+.theme-switcher button {
+    flex: 1;
+    padding: 8px 12px;
+    background-color: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.theme-switcher button.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.theme-switcher button:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* ===== Подвал сайдбара ===== */
 .sidebar-footer {
     margin-top: auto;
     padding: 16px;
@@ -87,7 +126,7 @@ body {
 .user-info {
     display: flex;
     flex-direction: column;
-    margin-bottom: 12px;
+    margin-bottom: 15px; /* увеличен отступ */
 }
 
 .user-name {
@@ -98,6 +137,99 @@ body {
     font-size: 0.85rem;
     color: var(--text-secondary);
     text-transform: capitalize;
+    margin-top: 4px;
+}
+
+.user-status.online::before {
+    content: "●";
+    color: #3BA55D;
+    margin-right: 4px;
+}
+.user-status.idle::before {
+    content: "●";
+    color: #FAA81A;
+    margin-right: 4px;
+}
+.user-status.offline::before {
+    content: "●";
+    color: #747F8D;
+    margin-right: 4px;
+}
+
+/* ===== Кнопки (единый стиль) ===== */
+.btn,
+button,
+input[type="submit"],
+a.btn,
+.login-btn,
+.register-btn,
+.logout-btn,
+.btn-primary,
+.btn-secondary,
+.menu-option {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: var(--primary);
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.2;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    margin: 8px 0; /* увеличен вертикальный отступ между кнопками */
+}
+
+.btn:hover,
+button:hover,
+input[type="submit"]:hover,
+a.btn:hover,
+.login-btn:hover,
+.register-btn:hover,
+.logout-btn:hover,
+.btn-primary:hover,
+.menu-option:hover {
+    background-color: var(--accent-1);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* ===== Красивые поля ввода ===== */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-light);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 15px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.3);
 }
 
 /* ===== Аватарки ===== */
@@ -123,12 +255,14 @@ body {
     margin-bottom: 20px;
 }
 
-/* ===== Основная область ===== */
+/* ===== Основная область чата ===== */
 .chat-area {
     flex: 1;
     display: flex;
     flex-direction: column;
     background-color: var(--chat-bg);
+    height: 100vh; /* занимает всю высоту */
+    overflow: hidden;
 }
 
 /* ===== Список чатов ===== */
@@ -141,7 +275,7 @@ body {
 }
 
 .conversation-list li {
-    padding: 8px 16px;
+    padding: 12px 16px;
     cursor: pointer;
     transition: background 0.2s;
 }
@@ -161,7 +295,6 @@ body {
 .conversation-list .avatar-small {
     width: 48px;
     height: 48px;
-    border-radius: 50%;
 }
 
 .conversation-info {
@@ -183,7 +316,30 @@ body {
     text-overflow: ellipsis;
 }
 
-/* ===== Сообщения ===== */
+/* ===== Заголовок чата ===== */
+.chat-header {
+    padding: 12px 20px;
+    background-color: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.chat-header-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.chat-header-info p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 2px 0 0;
+}
+
+/* ===== Сообщения (занимают всё доступное пространство) ===== */
 .messages {
     flex: 1;
     padding: 20px;
@@ -191,6 +347,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-height: 0; /* важно для flex-контейнера */
 }
 
 .message {
@@ -205,11 +362,16 @@ body {
     flex-direction: row-reverse;
 }
 
+.message .avatar-tiny {
+    align-self: flex-end;
+}
+
 .message-bubble {
     background-color: var(--sidebar-bg);
     padding: 8px 12px;
     border-radius: 18px 18px 18px 4px;
     word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .message.own .message-bubble {
@@ -232,7 +394,7 @@ body {
     margin-left: 8px;
 }
 
-/* ===== Поле ввода сообщения ===== */
+/* ===== Поле ввода сообщения (фиксированная высота) ===== */
 .message-input {
     display: flex;
     padding: 16px 20px;
@@ -240,98 +402,75 @@ body {
     border-top: 1px solid var(--border-color);
     gap: 12px;
     align-items: flex-end;
+    flex-shrink: 0;
 }
 
 .message-input textarea {
     flex: 1;
     background-color: var(--dark-bg);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: 24px;
-    padding: 10px 16px;
+    padding: 12px 16px;
     color: var(--text-light);
     font-family: inherit;
     resize: none;
     max-height: 120px;
     outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.message-input textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.3);
 }
 
 .message-input button {
     background-color: var(--primary);
     border: none;
     border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: white;
     font-size: 1.2rem;
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
 }
 
 .message-input button:hover {
     background-color: var(--accent-1);
 }
 
-/* ===== ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ КНОПОК ===== */
-/* Все элементы, которые должны выглядеть как кнопки, получают класс .btn */
-.btn,
-button,
-input[type="submit"],
-a.btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: var(--primary);
-    color: white;
-    text-decoration: none;
+/* ===== Мобильная кнопка меню (перемещена в правый верхний угол) ===== */
+.mobile-menu-toggle {
+    display: none;
+    background: var(--primary);
     border: none;
-    border-radius: 8px;  /* закруглённые углы, как у поля ввода */
+    color: white;
+    font-size: 2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    position: fixed;
+    top: 15px;
+    right: 15px; /* перемещена в правый верхний угол */
+    z-index: 1100;
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: 500;
-    text-align: center;
-    line-height: 1.2;
-    transition: background-color 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
 }
 
-/* Эффект при наведении */
-.btn:hover,
-button:hover,
-input[type="submit"]:hover,
-a.btn:hover {
+.mobile-menu-toggle:hover {
     background-color: var(--accent-1);
 }
 
-/* Второстепенные кнопки (например, "Отмена", "Назад") можно оформить классом .btn-secondary */
-.btn-secondary {
-    background-color: transparent;
-    border: 2px solid var(--primary);
-    color: var(--primary);
-}
-
-.btn-secondary:hover {
-    background-color: var(--primary);
-    color: white;
-}
-
-/* Кнопки на всю ширину в формах */
-.form-container button[type="submit"] {
-    width: 100%;
-    margin-top: 10px;
-}
-
-/* ===== Ссылки "назад" (не кнопки) ===== */
-.back-link {
-    color: var(--neon);
-    text-decoration: none;
-}
-
-.back-link:hover {
-    text-decoration: underline;
-}
-
-/* ===== Формы ===== */
+/* ===== Стили для форм ===== */
 .form-container {
     max-width: 500px;
     margin: 20px auto;
@@ -345,16 +484,14 @@ a.btn:hover {
     margin-bottom: 20px;
 }
 
-.form-container input,
-.form-container textarea,
-.form-container select {
+.form-container button[type="submit"] {
     width: 100%;
-    padding: 10px;
-    margin: 5px 0 15px;
-    background-color: var(--dark-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-light);
+    margin-top: 10px;
+}
+
+.form-errors {
+    margin-bottom: 15px;
+    color: #ff5555;
 }
 
 /* ===== Список друзей ===== */
@@ -382,7 +519,7 @@ a.btn:hover {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px;
+    padding: 12px;
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -398,25 +535,48 @@ a.btn:hover {
 .status.idle { background-color: #FAA81A; }
 .status.offline { background-color: #747F8D; }
 
-/* ===== Мобильная кнопка меню ===== */
-.mobile-menu-toggle {
-    display: none;
-    background: var(--primary);
-    border: none;
-    color: white;
-    font-size: 1.8rem;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1100;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
+/* ===== Настройки ===== */
+.settings-list {
+    list-style: none;
+    padding: 0;
 }
 
+.settings-list li {
+    margin: 15px 0; /* увеличен отступ */
+}
+
+.settings-list a {
+    width: 100%;
+    text-align: left;
+}
+
+/* ===== Профиль ===== */
+.avatar-wrapper {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+/* ===== Ссылки "назад" ===== */
+.back-link {
+    color: var(--neon);
+    text-decoration: none;
+    font-size: 0.95rem;
+    display: inline-block;
+    margin-top: 15px;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* ===== Адаптивность ===== */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
@@ -427,6 +587,7 @@ a.btn:hover {
         transform: translateX(-100%);
         width: 85%;
         max-width: 320px;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.3);
     }
 
     .sidebar.open {
@@ -439,10 +600,19 @@ a.btn:hover {
 
     .chat-area {
         width: 100%;
-        margin-left: 0;
     }
 
     .message {
         max-width: 85%;
+    }
+
+    .chat-index-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .profile-actions {
+        flex-direction: column;
     }
 }
