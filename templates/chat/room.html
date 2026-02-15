@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<div class="chat-room">
+<div class="chat-room" style="display: flex; flex-direction: column; height: 100%;">
     <div class="chat-header">
         <img src="{% if conversation.participants.first.avatar %}{{ conversation.participants.first.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-small">
         <div class="chat-header-info">
@@ -37,7 +37,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         initChatSocket(conversationId);
         const msgList = document.getElementById('message-list');
-        if (msgList) msgList.scrollTop = msgList.scrollHeight;
+        if (msgList) {
+            msgList.scrollTop = msgList.scrollHeight;
+        }
     });
 </script>
 {% endblock %}

@@ -12,7 +12,6 @@
     --border-color: #3A3C43;
     --hover-bg: #3A3C43;
     --input-bg: #2B2D33;
-    --input-focus: var(--primary);
 }
 
 /* ===== Базовые сбросы ===== */
@@ -61,62 +60,58 @@ body {
     color: var(--neon);
 }
 
+/* Навигация */
 .sidebar-nav ul {
     list-style: none;
     padding: 8px 0;
 }
 
 .sidebar-nav li {
-    margin: 8px 0; /* увеличенное расстояние между пунктами меню */
+    margin: 12px 8px; /* увеличенные отступы */
 }
 
 .sidebar-nav li a {
     display: block;
-    padding: 12px 16px;
-    color: var(--text-light);
+    padding: 14px 20px;
+    background-color: var(--primary);
+    color: white;
     text-decoration: none;
-    transition: background 0.2s;
-    border-radius: 8px;
-    margin: 0 8px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .sidebar-nav li a:hover {
-    background-color: var(--hover-bg);
-    color: var(--neon);
+    background-color: var(--accent-1);
 }
 
-/* ===== Переключатель темы ===== */
+/* Переключатель темы */
 .theme-switcher {
-    margin: 15px 0;
-    padding: 10px 16px;
+    margin: 16px;
     display: flex;
-    align-items: center;
-    gap: 15px; /* увеличенный отступ между кнопками */
+    gap: 12px;
 }
 
 .theme-switcher button {
     flex: 1;
-    padding: 8px 12px;
-    background-color: var(--hover-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    color: var(--text-light);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.theme-switcher button.active {
+    padding: 12px;
     background-color: var(--primary);
+    border: none;
+    border-radius: 12px;
     color: white;
-    border-color: var(--primary);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
 .theme-switcher button:hover {
-    background-color: var(--primary);
-    color: white;
+    background-color: var(--accent-1);
 }
 
-/* ===== Подвал сайдбара ===== */
+/* Подвал */
 .sidebar-footer {
     margin-top: auto;
     padding: 16px;
@@ -126,7 +121,10 @@ body {
 .user-info {
     display: flex;
     flex-direction: column;
-    margin-bottom: 15px; /* увеличен отступ */
+    margin-bottom: 16px;
+    padding: 8px;
+    background-color: var(--dark-bg);
+    border-radius: 8px;
 }
 
 .user-name {
@@ -136,7 +134,6 @@ body {
 .user-status {
     font-size: 0.85rem;
     color: var(--text-secondary);
-    text-transform: capitalize;
     margin-top: 4px;
 }
 
@@ -156,17 +153,26 @@ body {
     margin-right: 4px;
 }
 
-/* ===== Кнопки (единый стиль) ===== */
-.btn,
-button,
-input[type="submit"],
-a.btn,
-.login-btn,
-.register-btn,
-.logout-btn,
-.btn-primary,
-.btn-secondary,
-.menu-option {
+/* Кнопки в подвале */
+.logout-btn, .login-btn, .register-btn {
+    display: block;
+    padding: 14px;
+    background-color: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    margin: 8px 0;
+}
+
+.logout-btn:hover, .login-btn:hover, .register-btn:hover {
+    background-color: var(--accent-1);
+}
+
+/* ===== Общий стиль для всех кнопок ===== */
+.btn, button, input[type="submit"], a.btn, .btn-primary, .btn-secondary, .menu-option {
     display: inline-block;
     padding: 12px 24px;
     background-color: var(--primary);
@@ -178,21 +184,12 @@ a.btn,
     font-size: 1rem;
     font-weight: 500;
     text-align: center;
-    line-height: 1.2;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, transform 0.1s;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    margin: 8px 0; /* увеличен вертикальный отступ между кнопками */
+    margin: 8px 0;
 }
 
-.btn:hover,
-button:hover,
-input[type="submit"]:hover,
-a.btn:hover,
-.login-btn:hover,
-.register-btn:hover,
-.logout-btn:hover,
-.btn-primary:hover,
-.menu-option:hover {
+.btn:hover, button:hover, input[type="submit"]:hover, a.btn:hover, .btn-primary:hover, .menu-option:hover {
     background-color: var(--accent-1);
 }
 
@@ -207,28 +204,28 @@ a.btn:hover,
     color: white;
 }
 
-/* ===== Красивые поля ввода ===== */
+/* ===== Поля ввода ===== */
 input[type="text"],
 input[type="email"],
 input[type="password"],
 textarea,
 select {
     width: 100%;
-    padding: 12px 16px;
+    padding: 14px 16px;
     background-color: var(--input-bg);
     border: 2px solid var(--border-color);
     border-radius: 12px;
     color: var(--text-light);
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
     outline: none;
-    border-color: var(--input-focus);
+    border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.3);
 }
 
@@ -261,7 +258,7 @@ select:focus {
     display: flex;
     flex-direction: column;
     background-color: var(--chat-bg);
-    height: 100vh; /* занимает всю высоту */
+    height: 100vh;
     overflow: hidden;
 }
 
@@ -339,7 +336,7 @@ select:focus {
     margin: 2px 0 0;
 }
 
-/* ===== Сообщения (занимают всё доступное пространство) ===== */
+/* ===== Сообщения ===== */
 .messages {
     flex: 1;
     padding: 20px;
@@ -347,7 +344,7 @@ select:focus {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-height: 0; /* важно для flex-контейнера */
+    min-height: 0;
 }
 
 .message {
@@ -363,6 +360,9 @@ select:focus {
 }
 
 .message .avatar-tiny {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     align-self: flex-end;
 }
 
@@ -394,7 +394,7 @@ select:focus {
     margin-left: 8px;
 }
 
-/* ===== Поле ввода сообщения (фиксированная высота) ===== */
+/* ===== Поле ввода сообщения ===== */
 .message-input {
     display: flex;
     padding: 16px 20px;
@@ -410,13 +410,13 @@ select:focus {
     background-color: var(--dark-bg);
     border: 2px solid var(--border-color);
     border-radius: 24px;
-    padding: 12px 16px;
+    padding: 14px 18px;
     color: var(--text-light);
     font-family: inherit;
     resize: none;
     max-height: 120px;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s;
 }
 
 .message-input textarea:focus {
@@ -428,42 +428,43 @@ select:focus {
     background-color: var(--primary);
     border: none;
     border-radius: 50%;
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: white;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     flex-shrink: 0;
     padding: 0;
     margin: 0;
+    transition: background-color 0.2s;
 }
 
 .message-input button:hover {
     background-color: var(--accent-1);
 }
 
-/* ===== Мобильная кнопка меню (перемещена в правый верхний угол) ===== */
+/* ===== Мобильная кнопка меню (справа) ===== */
 .mobile-menu-toggle {
     display: none;
     background: var(--primary);
     border: none;
     color: white;
     font-size: 2rem;
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     position: fixed;
     top: 15px;
-    right: 15px; /* перемещена в правый верхний угол */
+    right: 15px;
     z-index: 1100;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
+    transition: background-color 0.2s;
 }
 
 .mobile-menu-toggle:hover {
@@ -474,34 +475,28 @@ select:focus {
 .form-container {
     max-width: 500px;
     margin: 20px auto;
-    padding: 20px;
+    padding: 24px;
     background-color: var(--sidebar-bg);
     border-radius: 16px;
 }
 
 .form-container h2 {
     color: var(--neon);
-    margin-bottom: 20px;
-}
-
-.form-container button[type="submit"] {
-    width: 100%;
-    margin-top: 10px;
+    margin-bottom: 24px;
 }
 
 .form-errors {
-    margin-bottom: 15px;
+    margin-bottom: 16px;
     color: #ff5555;
 }
 
 /* ===== Список друзей ===== */
 .friends, .friend-requests, .profile {
-    padding: 20px;
+    padding: 24px;
     max-width: 600px;
-    margin: 0 auto;
+    margin: 20px auto;
     background-color: var(--sidebar-bg);
     border-radius: 16px;
-    margin-top: 20px;
 }
 
 .friends h2, .friend-requests h2, .profile h2 {
@@ -524,8 +519,8 @@ select:focus {
 }
 
 .status {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
     display: inline-block;
     margin-left: 8px;
@@ -542,7 +537,7 @@ select:focus {
 }
 
 .settings-list li {
-    margin: 15px 0; /* увеличен отступ */
+    margin: 16px 0;
 }
 
 .settings-list a {
@@ -558,8 +553,8 @@ select:focus {
 
 .profile-actions {
     display: flex;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 16px;
+    margin-top: 24px;
     flex-wrap: wrap;
 }
 
@@ -569,7 +564,7 @@ select:focus {
     text-decoration: none;
     font-size: 0.95rem;
     display: inline-block;
-    margin-top: 15px;
+    margin-top: 16px;
 }
 
 .back-link:hover {
@@ -615,4 +610,41 @@ select:focus {
     .profile-actions {
         flex-direction: column;
     }
+}
+
+/* ===== Дополнительные стили для заголовков страниц ===== */
+.chat-index-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background-color: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-index-header h1 {
+    margin: 0;
+    color: var(--neon);
+    font-size: 1.5rem;
+}
+
+.create-chat-menu {
+    text-align: center;
+    padding: 40px;
+}
+
+.create-chat-menu h2 {
+    color: var(--neon);
+    margin-bottom: 30px;
+}
+
+.menu-options {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.menu-option {
+    min-width: 200px;
 }

@@ -9,7 +9,7 @@
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
-    <!-- Кнопка бургер-меню в правом верхнем углу -->
+    <!-- Бургер-кнопка в правом верхнем углу -->
     <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Меню">☰</button>
 
     <div class="main">
@@ -17,7 +17,7 @@
             <div class="sidebar-header">
                 <h3>Aura</h3>
                 {% if user.is_authenticated %}
-                <a href="{% url 'users:profile' %}" class="user-avatar-link">
+                <a href="{% url 'users:profile' %}">
                     {% if user.avatar %}
                         <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-small">
                     {% else %}
@@ -38,10 +38,9 @@
                 </ul>
             </nav>
 
-            <!-- Переключатель темы -->
             <div class="theme-switcher">
-                <button id="theme-dark" class="btn">🌙 Тёмная</button>
-                <button id="theme-light" class="btn">☀️ Светлая</button>
+                <button class="btn" id="theme-dark">🌙 Тёмная</button>
+                <button class="btn" id="theme-light">☀️ Светлая</button>
             </div>
 
             <div class="sidebar-footer">
@@ -84,7 +83,7 @@
                 });
             }
 
-            // Переключение темы (можно дополнить логикой сохранения)
+            // Переключение темы (можно дополнить сохранением)
             const darkBtn = document.getElementById('theme-dark');
             const lightBtn = document.getElementById('theme-light');
             const body = document.body;
