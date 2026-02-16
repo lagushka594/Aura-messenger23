@@ -400,10 +400,9 @@ def delete_message(request, message_id):
     )
     return JsonResponse({'status': 'ok'})
 
-# --- Боты (базовая заглушка) ---
+# --- Боты (заглушка) ---
 @login_required
 def bot_list(request):
-    # Убедитесь, что модель Bot импортирована, или закомментируйте, если не используется
     # from .models import Bot
     # bots = Bot.objects.filter(owner=request.user)
     # return render(request, 'chat/bot_list.html', {'bots': bots})
@@ -496,23 +495,18 @@ def file_list(request, conversation_id):
     files = FileMessage.objects.filter(message__conversation=conversation).order_by('-message__timestamp')
     return render(request, 'chat/file_list.html', {'conversation': conversation, 'files': files})
 
-# --- Скачивание файла (исправлено) ---
+# --- Скачивание файла ---
 @login_required
 def download_file(request, file_id):
     file_msg = get_object_or_404(FileMessage, id=file_id)
-    # Проверяем, что пользователь участник чата
     if request.user not in file_msg.message.conversation.participants.all():
         raise Http404
-    # Получаем путь к файлу
     file_path = file_msg.file.path
-    # Проверяем, существует ли файл на диске
     if not os.path.exists(file_path):
         raise Http404("Файл не найден на сервере")
-    # Определяем MIME-тип
     content_type, encoding = mimetypes.guess_type(file_path)
     if content_type is None:
         content_type = 'application/octet-stream'
-    # Отдаём файл
     response = FileResponse(open(file_path, 'rb'), content_type=content_type)
     response['Content-Disposition'] = f'attachment; filename="{file_msg.filename}"'
     return response

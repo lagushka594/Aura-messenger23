@@ -23,12 +23,18 @@
                         {% if conv.type == 'favorite' %}⭐ {% endif %}
                         {{ conv.name|default:'Личный чат' }}
                         {% if conv.is_pinned %}📌{% endif %}
-                        {% if conv.unread_count %}
-                            <span class="unread-badge">{{ conv.unread_count }}</span>
+                    </span>
+                    <span class="last-message">
+                        {% if conv.last_msg_content %}
+                            {{ conv.last_msg_content|truncatechars:30 }}
+                        {% else %}
+                            Нет сообщений
                         {% endif %}
                     </span>
-                    <span class="last-message">{{ conv.last_msg_content|truncatechars:30 }}</span>
                 </div>
+                {% if conv.unread_count and conv.unread_count > 0 %}
+                    <span class="unread-badge">{{ conv.unread_count }}</span>
+                {% endif %}
                 {% if conv.last_message %}
                 <span class="conversation-time">{{ conv.last_message.timestamp|time:"H:i" }}</span>
                 {% endif %}

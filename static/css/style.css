@@ -333,6 +333,8 @@ select:focus {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: block;
+    line-height: 1.2;
 }
 
 .conversation-time {
@@ -340,6 +342,25 @@ select:focus {
     color: var(--text-secondary);
     margin-left: auto;
     padding-left: 8px;
+}
+
+/* ===== Бейдж непрочитанных ===== */
+.unread-badge {
+    background-color: #ff5555;
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    box-shadow: 0 0 5px rgba(255,0,0,0.5);
+    position: relative;
+    top: -10px;
 }
 
 /* ===== Заголовок чата ===== */
@@ -439,7 +460,7 @@ select:focus {
     margin-left: 8px;
 }
 
-/* ===== Поле ввода сообщения (новая версия) ===== */
+/* ===== Поле ввода сообщения ===== */
 .message-input {
     display: flex;
     align-items: center;
@@ -534,13 +555,6 @@ select:focus {
     color: var(--primary);
 }
 
-/* Положение эмодзи-пикера */
-#emoji-picker {
-    bottom: 80px;
-    right: 20px;
-}
-
-/* Убедитесь, что старые стили не конфликтуют */
 .message-input button {
     margin: 0;
 }
@@ -548,7 +562,7 @@ select:focus {
 /* ===== Эмодзи-пикер ===== */
 #emoji-picker {
     position: absolute;
-    bottom: 70px;
+    bottom: 80px;
     right: 20px;
     background: var(--sidebar-bg);
     border: 1px solid var(--border-color);
@@ -838,7 +852,7 @@ select:focus {
 #sticker-panel {
     display: none;
     position: absolute;
-    bottom: 70px;
+    bottom: 80px;
     right: 20px;
     background: var(--sidebar-bg);
     border: 1px solid var(--border-color);
@@ -862,16 +876,6 @@ select:focus {
 
 #sticker-panel img:hover {
     transform: scale(1.1);
-}
-
-/* ===== Бейдж непрочитанных ===== */
-.unread-badge {
-    background-color: var(--primary);
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 0.7rem;
-    margin-left: 5px;
 }
 
 /* ===== Контекстное меню ===== */
