@@ -4,7 +4,7 @@ import traceback
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
-from .models import Conversation, Message
+from .models import Conversation, Message, VoiceRoom
 
 logger = logging.getLogger(__name__)
 
@@ -121,9 +121,14 @@ class VoiceConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # Проверяем, что пользователь в голосовой комнате
+        # Получаем голосовую комнату асинхронно
         self.voice_room = await self.get_voice_room()
-        if not self.voice_room or self.user not in self.voice_room.active_users.all():
+        if not self.voice_room:
+            await self.close()
+            return
+
+        # Проверяем, есть ли пользователь в активных
+        if not await self.user_in_room():
             await self.close()
             return
 
@@ -152,8 +157,11 @@ class VoiceConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_voice_room(self):
-        from .models import VoiceRoom
         try:
             return VoiceRoom.objects.get(id=self.voice_room_id)
         except VoiceRoom.DoesNotExist:
             return None
+
+    @database_sync_to_async
+    def user_in_room(self):
+        return self.user in self.voice_room.active_users.all()
