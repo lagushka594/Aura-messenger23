@@ -9,7 +9,6 @@
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
 </head>
 <body>
-    <!-- Бургер-кнопка справа -->
     <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Меню">☰</button>
 
     <div class="main">
@@ -31,6 +30,7 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li><a href="{% url 'chat:index' %}" class="btn">💬 Чаты</a></li>
+                    <li><a href="{% url 'chat:favorite' %}" class="btn">⭐ Избранное</a></li>
                     <li><a href="{% url 'users:friends' %}" class="btn">👥 Контакты</a></li>
                     <li><a href="{% url 'users:friend_requests' %}" class="btn">📨 Заявки</a></li>
                     <li><a href="{% url 'users:profile' %}" class="btn">⚙️ Профиль</a></li>
@@ -69,7 +69,6 @@
     <script src="{% static 'js/emoji-picker.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Мобильное меню
             const menuToggle = document.getElementById('mobile-menu-toggle');
             const sidebar = document.getElementById('sidebar');
             if (menuToggle && sidebar) {
@@ -84,7 +83,6 @@
                 });
             }
 
-            // Переключение темы с сохранением в localStorage
             const darkBtn = document.getElementById('theme-dark');
             const lightBtn = document.getElementById('theme-light');
             const body = document.body;
@@ -102,7 +100,6 @@
                 localStorage.setItem('aura-theme', theme);
             }
 
-            // Загружаем сохранённую тему
             const savedTheme = localStorage.getItem('aura-theme') || 'dark';
             setTheme(savedTheme);
 

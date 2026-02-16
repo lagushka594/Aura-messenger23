@@ -32,11 +32,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {
                     'type': 'chat_message',
-                    'message_id': message.id,
+                    'id': message.id,
                     'sender_id': self.user.id,
                     'sender_name': self.user.get_display_name(),
+                    'sender_avatar': self.user.avatar.url if self.user.avatar else None,
                     'content': content,
-                    'timestamp': str(message.timestamp),
+                    'timestamp': message.timestamp.isoformat(),
                 }
             )
 

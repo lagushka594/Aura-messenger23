@@ -12,8 +12,13 @@ urlpatterns = [
     path('create/', views.create_chat, name='create_chat'),
     path('create/group/', views.create_group, name='create_group'),
     path('create/private/', views.create_private_chat, name='create_private_chat'),
-    # Действия с чатами (удалены)
+    # Избранное
+    path('favorite/', views.favorite_chat, name='favorite'),
     # Приглашения
     path('invite/<int:conversation_id>/', views.create_invite, name='create_invite'),
     path('join/<str:token>/', views.join_via_invite, name='join_via_invite'),
+    # Загрузка файлов
+    path('upload/<int:conversation_id>/', views.upload_file, name='upload_file'),
+    # Редактирование канала
+    path('edit/<int:conversation_id>/', views.edit_channel, name='edit_channel'),
 ]

@@ -15,6 +15,7 @@ class Conversation(models.Model):
     CONV_TYPE = [
         ('private', 'Личный'),
         ('group', 'Групповой'),
+        ('favorite', 'Избранное'),
     ]
     type = models.CharField(max_length=10, choices=CONV_TYPE)
     name = models.CharField(max_length=100, blank=True, null=True)
@@ -22,6 +23,7 @@ class Conversation(models.Model):
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, through='ConversationParticipant')
     created_at = models.DateTimeField(auto_now_add=True)
     last_message = models.ForeignKey('Message', on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='owned_chats')
 
     objects = ConversationManager()
 
@@ -50,8 +52,14 @@ class Message(models.Model):
     def __str__(self):
         return f'{self.sender}: {self.content[:20]}'
 
+class FileMessage(models.Model):
+    message = models.OneToOneField(Message, on_delete=models.CASCADE, related_name='file')
+    file = models.FileField(upload_to='chat_files/%Y/%m/%d/')
+    filename = models.CharField(max_length=255)
+    file_size = models.IntegerField()
+    file_type = models.CharField(max_length=100, blank=True)
+
 class Invite(models.Model):
-    """Приглашение в чат (для групп)"""
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='invites')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     token = models.CharField(max_length=64, unique=True, default=secrets.token_urlsafe)

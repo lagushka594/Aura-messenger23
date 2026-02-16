@@ -4,20 +4,40 @@
 <div class="chat-room" style="display: flex; flex-direction: column; height: 100%;">
     <div class="chat-header">
         <img src="{% if conversation.avatar %}{{ conversation.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-small">
-        <div class="chat-header-info">
-            <h4>{{ conversation.name|default:'Личный чат' }}</h4>
+        <div class="chat-header-info" id="chat-title">
+            <h4>
+                {% if conversation.type == 'favorite' %}⭐ {% endif %}
+                {{ conversation.name|default:'Личный чат' }}
+            </h4>
             <p>участников: {{ conversation.participants.count }}</p>
         </div>
         <div class="chat-header-actions">
             {% if conversation.type == 'group' and is_admin %}
                 <button class="btn btn-secondary" id="invite-btn">🔗 Пригласить</button>
             {% endif %}
-            <!-- Кнопка удаления убрана -->
+            {% if is_admin %}
+                <a href="{% url 'chat:edit_channel' conversation.id %}" class="btn btn-secondary">⚙️ Настройки</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Выпадающее меню канала -->
+    <div id="channel-menu" class="dropdown-menu" style="display: none;">
+        <div class="dropdown-content">
+            <h3>{{ conversation.name|default:'Канал' }}</h3>
+            <ul class="participants-list">
+                {% for participant in conversation.participants.all %}
+                <li>
+                    <img src="{% if participant.avatar %}{{ participant.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-tiny">
+                    {{ participant.get_display_name }}
+                </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 
     <!-- Модальное окно для приглашения -->
-    <div id="invite-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--sidebar-bg); padding: 20px; border-radius: 12px; z-index: 2000; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+    <div id="invite-modal" style="display: none;">
         <h3>Пригласить друга</h3>
         <p>Выберите способ:</p>
         <button class="btn" id="copy-link">Скопировать ссылку</button>
@@ -32,7 +52,13 @@
             <img src="{% if message.sender.avatar %}{{ message.sender.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-tiny">
             <div class="message-bubble">
                 <span class="message-sender">{{ message.sender.get_display_name }}</span>
-                <div class="message-content">{{ message.content }}</div>
+                <div class="message-content">
+                    {% if message.file %}
+                        <a href="{{ message.file.file.url }}" target="_blank">{{ message.file.filename }}</a>
+                    {% else %}
+                        {{ message.content }}
+                    {% endif %}
+                </div>
                 <span class="message-time">{{ message.timestamp|time:"H:i" }}</span>
             </div>
         </div>
@@ -46,25 +72,48 @@
 </div>
 
 <script>
+    window.currentUserId = {{ user.id }};
     const conversationId = {{ conversation.id }};
 
-    // Приглашение через AJAX
+    document.getElementById('chat-title').addEventListener('click', function(e) {
+        const menu = document.getElementById('channel-menu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        e.stopPropagation();
+    });
+
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('channel-menu');
+        if (!menu.contains(e.target) && e.target !== document.getElementById('chat-title')) {
+            menu.style.display = 'none';
+        }
+    });
+
     document.getElementById('invite-btn')?.addEventListener('click', function() {
         fetch("{% url 'chat:create_invite' conversation.id %}", {
             headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
         .then(data => {
             const modal = document.getElementById('invite-modal');
             const result = document.getElementById('invite-result');
             modal.style.display = 'block';
             document.getElementById('copy-link').onclick = function() {
-                navigator.clipboard.writeText(data.link);
-                result.textContent = 'Ссылка скопирована!';
+                navigator.clipboard.writeText(data.link).then(() => {
+                    result.textContent = 'Ссылка скопирована!';
+                }).catch(() => {
+                    result.textContent = 'Не удалось скопировать';
+                });
             };
             document.getElementById('show-code').onclick = function() {
                 result.textContent = 'Код: ' + data.token;
             };
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Не удалось создать приглашение');
         });
     });
 </script>

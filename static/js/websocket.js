@@ -1,20 +1,4 @@
-let statusSocket = null;
 let chatSocket = null;
-
-function initStatusSocket() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    statusSocket = new WebSocket(protocol + '//' + window.location.host + '/ws/status/');
-    statusSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        if (data.type === 'friend_status') {
-            updateFriendStatus(data.user_id, data.status);
-        }
-    };
-    statusSocket.onclose = function(e) {
-        console.error('Status socket closed unexpectedly');
-        setTimeout(initStatusSocket, 5000);
-    };
-}
 
 function initChatSocket(conversationId) {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -22,14 +6,17 @@ function initChatSocket(conversationId) {
         chatSocket.close();
     }
     chatSocket = new WebSocket(protocol + '//' + window.location.host + '/ws/chat/' + conversationId + '/');
+    
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         if (data.type === 'chat_message') {
             addMessageToChat(data);
         }
     };
+    
     chatSocket.onclose = function(e) {
-        console.error('Chat socket closed');
+        console.error('Chat socket closed unexpectedly');
+        setTimeout(() => initChatSocket(conversationId), 5000);
     };
 }
 
@@ -49,11 +36,11 @@ function addMessageToChat(data) {
     if (!messageList) return;
 
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'message';
-    messageDiv.id = 'msg-' + data.message_id;
+    messageDiv.className = `message ${data.sender_id === window.currentUserId ? 'own' : ''}`;
+    messageDiv.id = 'msg-' + data.id;
 
     const avatar = document.createElement('img');
-    avatar.src = '/static/images/default-avatar.png';
+    avatar.src = data.sender_avatar || '/static/images/default-avatar.png';
     avatar.className = 'avatar-tiny';
     messageDiv.appendChild(avatar);
 
@@ -67,12 +54,21 @@ function addMessageToChat(data) {
 
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
-    contentDiv.textContent = data.content;
+    if (data.file_url) {
+        const link = document.createElement('a');
+        link.href = data.file_url;
+        link.textContent = data.filename || 'Файл';
+        link.target = '_blank';
+        contentDiv.appendChild(link);
+    } else {
+        contentDiv.textContent = data.content;
+    }
     bubble.appendChild(contentDiv);
 
     const timeSpan = document.createElement('span');
     timeSpan.className = 'message-time';
-    timeSpan.textContent = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    const date = new Date(data.timestamp);
+    timeSpan.textContent = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     bubble.appendChild(timeSpan);
 
     messageDiv.appendChild(bubble);

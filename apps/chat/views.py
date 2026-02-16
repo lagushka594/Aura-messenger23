@@ -4,14 +4,15 @@ from django.contrib import messages
 from django.db.models import Q, OuterRef, Subquery, F
 from django.http import Http404, JsonResponse
 from django.utils import timezone
-from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite
+from django.views.decorators.csrf import csrf_exempt
+from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite, FileMessage
 from apps.users.models import User
 from .forms import CreateGroupForm, CreatePrivateChatForm
 import secrets
+import os
 
 @login_required
 def index(request):
-    # Показываем все чаты, в которых участвует пользователь (без фильтра по deleted)
     conversations = Conversation.objects.filter(
         participants=request.user
     ).annotate(
@@ -21,7 +22,6 @@ def index(request):
     ).order_by(
         F('last_message__timestamp').desc(nulls_last=True)
     ).select_related('last_message')
-    
     return render(request, 'chat/index.html', {'conversations': conversations})
 
 @login_required
@@ -32,8 +32,13 @@ def room(request, conversation_id):
         try:
             other_user = User.objects.get(id=conversation_id)
             if other_user == request.user:
-                messages.error(request, 'Нельзя открыть чат с самим собой')
-                return redirect('chat:index')
+                fav, _ = Conversation.objects.get_or_create(
+                    type='favorite',
+                    name='Избранное',
+                    owner=request.user
+                )
+                fav.participants.add(request.user)
+                return redirect('chat:room', conversation_id=fav.id)
             conversation, created = Conversation.objects.get_or_create_private(request.user, other_user)
             return redirect('chat:room', conversation_id=conversation.id)
         except User.DoesNotExist:
@@ -42,7 +47,7 @@ def room(request, conversation_id):
     Message.objects.filter(conversation=conversation).exclude(sender=request.user).update(is_read=True)
     messages_list = Message.objects.filter(conversation=conversation).select_related('sender').order_by('timestamp')
     participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
-    is_admin = participant.is_admin or conversation.type == 'private'
+    is_admin = participant.is_admin or conversation.type in ['private', 'favorite']
     
     invites = None
     if conversation.type == 'group' and is_admin:
@@ -68,7 +73,6 @@ def channel_detail(request, channel_id):
     return render(request, 'chat/channel.html', {'channel': channel})
 
 # --- Создание чатов ---
-
 @login_required
 def create_chat(request):
     return render(request, 'chat/create_chat_menu.html')
@@ -113,11 +117,19 @@ def create_private_chat(request):
         form = CreatePrivateChatForm()
     return render(request, 'chat/create_private_chat.html', {'form': form})
 
-# --- Действия с чатами (удалено) ---
-# Функция delete_chat удалена, так как кнопка удаления больше не нужна
+# --- Избранное ---
+@login_required
+def favorite_chat(request):
+    fav, created = Conversation.objects.get_or_create(
+        type='favorite',
+        name='Избранное',
+        owner=request.user
+    )
+    if created:
+        fav.participants.add(request.user)
+    return redirect('chat:room', conversation_id=fav.id)
 
 # --- Приглашения ---
-
 @login_required
 def create_invite(request, conversation_id):
     conversation = get_object_or_404(Conversation, id=conversation_id, type='group')
@@ -158,3 +170,56 @@ def join_via_invite(request, token):
     invite.save()
     messages.success(request, f'Вы присоединились к чату {invite.conversation.name}')
     return redirect('chat:room', conversation_id=invite.conversation.id)
+
+# --- Загрузка файлов ---
+@login_required
+@csrf_exempt
+def upload_file(request, conversation_id):
+    if request.method == 'POST' and request.FILES.get('file'):
+        conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+        uploaded_file = request.FILES['file']
+        
+        message = Message.objects.create(
+            conversation=conversation,
+            sender=request.user,
+            content='📎 Файл'
+        )
+        file_msg = FileMessage.objects.create(
+            message=message,
+            file=uploaded_file,
+            filename=uploaded_file.name,
+            file_size=uploaded_file.size,
+            file_type=uploaded_file.content_type
+        )
+        
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'chat_{conversation_id}',
+            {
+                'type': 'chat_message',
+                'id': message.id,
+                'sender_id': request.user.id,
+                'sender_name': request.user.get_display_name(),
+                'sender_avatar': request.user.avatar.url if request.user.avatar else None,
+                'content': f'📎 [{uploaded_file.name}]({file_msg.file.url})',
+                'file_url': file_msg.file.url,
+                'filename': uploaded_file.name,
+                'timestamp': message.timestamp.isoformat(),
+            }
+        )
+        
+        return JsonResponse({'status': 'ok', 'file_url': file_msg.file.url})
+    return JsonResponse({'status': 'error'}, status=400)
+
+# --- Редактирование канала (заглушка) ---
+@login_required
+def edit_channel(request, conversation_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
+    if not participant.is_admin and conversation.type != 'favorite':
+        messages.error(request, 'Недостаточно прав')
+        return redirect('chat:room', conversation_id=conversation.id)
+    messages.info(request, 'Функция в разработке')
+    return redirect('chat:room', conversation_id=conversation.id)
