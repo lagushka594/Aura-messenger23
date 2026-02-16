@@ -7,33 +7,54 @@ function initChatSocket(conversationId) {
     }
     chatSocket = new WebSocket(protocol + '//' + window.location.host + '/ws/chat/' + conversationId + '/');
     
+    chatSocket.onopen = function(e) {
+        console.log('WebSocket connected to chat', conversationId);
+    };
+    
     chatSocket.onmessage = function(e) {
+        console.log('WebSocket message received:', e.data);
         const data = JSON.parse(e.data);
         if (data.type === 'chat_message') {
             addMessageToChat(data);
         }
     };
     
+    chatSocket.onerror = function(e) {
+        console.error('WebSocket error:', e);
+    };
+    
     chatSocket.onclose = function(e) {
-        console.error('Chat socket closed unexpectedly');
+        console.error('Chat socket closed unexpectedly. Code:', e.code, 'Reason:', e.reason);
         setTimeout(() => initChatSocket(conversationId), 5000);
     };
 }
 
 function sendMessage(content) {
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-        chatSocket.send(JSON.stringify({
+        const msg = {
             'type': 'message',
             'content': content
-        }));
+        };
+        console.log('Sending message:', msg);
+        chatSocket.send(JSON.stringify(msg));
     } else {
-        console.error('Chat socket not open');
+        console.error('Chat socket not open. State:', chatSocket ? chatSocket.readyState : 'null');
     }
 }
 
 function addMessageToChat(data) {
+    console.log('Adding message to chat:', data);
     const messageList = document.getElementById('message-list');
-    if (!messageList) return;
+    if (!messageList) {
+        console.error('Message list element not found');
+        return;
+    }
+
+    // Проверяем, не добавлено ли уже это сообщение
+    if (document.getElementById('msg-' + data.id)) {
+        console.log('Message already exists, skipping');
+        return;
+    }
 
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${data.sender_id === window.currentUserId ? 'own' : ''}`;
@@ -74,11 +95,5 @@ function addMessageToChat(data) {
     messageDiv.appendChild(bubble);
     messageList.appendChild(messageDiv);
     messageList.scrollTop = messageList.scrollHeight;
-}
-
-function updateFriendStatus(userId, status) {
-    const statusSpans = document.querySelectorAll(`.status[data-user-id="${userId}"]`);
-    statusSpans.forEach(span => {
-        span.className = 'status ' + status;
-    });
+    console.log('Message added, scrolling to bottom');
 }
