@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
@@ -12,47 +13,63 @@ User = get_user_model()
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope['user']
+        self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
+        self.room_group_name = f'chat_{self.conversation_id}'
+
+        logger.info(f"WebSocket connect attempt: user={self.user.id if not self.user.is_anonymous else 'anonymous'}, conversation_id={self.conversation_id}")
+
         if self.user.is_anonymous:
-            logger.warning("Anonymous user tried to connect")
-            await self.close()
-        else:
-            self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
-            self.room_group_name = f'chat_{self.conversation_id}'
-            if await self.is_participant():
-                await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-                await self.accept()
-                logger.info(f"User {self.user.id} connected to chat {self.conversation_id}")
-            else:
+            logger.warning("Anonymous user rejected")
+            await self.close(code=4001)
+            return
+
+        try:
+            if not await self.is_participant():
                 logger.warning(f"User {self.user.id} not participant of chat {self.conversation_id}")
-                await self.close()
+                await self.close(code=4003)
+                return
+
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            await self.accept()
+            logger.info(f"User {self.user.id} connected to chat {self.conversation_id}")
+        except Exception as e:
+            logger.error(f"Error in connect: {e}\n{traceback.format_exc()}")
+            await self.close(code=1011)
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-        logger.info(f"User {self.user.id} disconnected from chat {self.conversation_id}")
+        logger.info(f"User {self.user.id if hasattr(self, 'user') else 'unknown'} disconnected from chat {getattr(self, 'conversation_id', 'unknown')} with code {close_code}")
+        if hasattr(self, 'room_group_name'):
+            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
         logger.info(f"Received message: {text_data}")
-        data = json.loads(text_data)
-        if data['type'] == 'message':
-            content = data['content']
-            message = await self.save_message(content)
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'chat_message',
-                    'id': message.id,
-                    'sender_id': self.user.id,
-                    'sender_name': self.user.get_display_name(),
-                    'sender_avatar': self.user.avatar.url if self.user.avatar else None,
-                    'content': content,
-                    'timestamp': message.timestamp.isoformat(),
-                }
-            )
-            logger.info(f"Message sent to group {self.room_group_name}")
+        try:
+            data = json.loads(text_data)
+            if data['type'] == 'message':
+                content = data['content']
+                message = await self.save_message(content)
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'chat_message',
+                        'id': message.id,
+                        'sender_id': self.user.id,
+                        'sender_name': self.user.get_display_name(),
+                        'sender_avatar': self.user.avatar.url if self.user.avatar else None,
+                        'content': content,
+                        'timestamp': message.timestamp.isoformat(),
+                    }
+                )
+                logger.info(f"Message sent to group {self.room_group_name}")
+        except Exception as e:
+            logger.error(f"Error in receive: {e}\n{traceback.format_exc()}")
 
     async def chat_message(self, event):
-        await self.send(text_data=json.dumps(event))
-        logger.info(f"Message forwarded to client: {event['id']}")
+        try:
+            await self.send(text_data=json.dumps(event))
+            logger.info(f"Message forwarded to client: {event['id']}")
+        except Exception as e:
+            logger.error(f"Error in chat_message: {e}")
 
     @database_sync_to_async
     def is_participant(self):
