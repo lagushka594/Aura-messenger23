@@ -8,6 +8,9 @@
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Войти</button>
     </form>
-    <p>Нет аккаунта? <a href="{% url 'users:register' %}" class="link">Зарегистрируйтесь</a></p>
+    <p>Нет аккаунта? <a href="{% url 'users:register' %}">Зарегистрируйтесь</a></p>
+    <p class="terms-text" style="font-size: 0.85rem; color: var(--text-secondary); text-align: center; margin-top: 15px;">
+        Входя в Aura, вы соглашаетесь с <a href="#" onclick="showTerms(); return false;">пользовательским соглашением</a>.
+    </p>
 </div>
 {% endblock %}

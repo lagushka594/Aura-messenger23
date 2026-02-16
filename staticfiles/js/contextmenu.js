@@ -48,21 +48,17 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             currentMessageId = messageDiv.dataset.messageId;
             currentMessageSenderId = parseInt(messageDiv.dataset.senderId);
-            currentConversationId = window.conversationId; // предполагается, что эта переменная есть
+            currentConversationId = window.conversationId;
 
-            // Показываем меню у курсора
             messageMenu.style.left = e.pageX + 'px';
             messageMenu.style.top = e.pageY + 'px';
             messageMenu.style.display = 'block';
 
-            // Настраиваем пункты в зависимости от прав
             const isOwner = (currentMessageSenderId === window.currentUserId);
             document.getElementById('menu-edit').style.display = isOwner ? 'block' : 'none';
             document.getElementById('menu-delete').style.display = isOwner ? 'block' : 'none';
-            document.getElementById('menu-pin').style.display = isOwner ? 'block' : 'none'; // или админ
-            // Для остальных пунктов всегда показываем
+            document.getElementById('menu-pin').style.display = isOwner ? 'block' : 'none';
         } else {
-            // Проверяем, не клик ли на заголовок чата
             const chatHeader = e.target.closest('.chat-header');
             if (chatHeader) {
                 e.preventDefault();
@@ -76,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработчики пунктов меню сообщений
     document.getElementById('menu-reply').addEventListener('click', function() {
         if (currentMessageId) {
-            window.location.href = `/chat/reply/${currentMessageId}/`; // или открыть окно ответа
+            window.location.href = `/chat/reply/${currentMessageId}/`;
         }
         messageMenu.style.display = 'none';
     });
@@ -134,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chatMenu.style.display = 'none';
     });
 
-    // Вспомогательная функция для получения CSRF токена (если не определена)
+    // Вспомогательная функция для получения CSRF токена
     if (typeof getCookie === 'undefined') {
         window.getCookie = function(name) {
             let cookieValue = null;

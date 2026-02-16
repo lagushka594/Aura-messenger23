@@ -5,6 +5,15 @@
     <h2>Настройки канала</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+        {% if form.errors %}
+            <div class="form-errors">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <p style="color: red;">{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
