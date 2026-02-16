@@ -344,25 +344,6 @@ select:focus {
     padding-left: 8px;
 }
 
-/* ===== Бейдж непрочитанных ===== */
-.unread-badge {
-    background-color: #ff5555;
-    color: white;
-    border-radius: 50%;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
-    box-shadow: 0 0 5px rgba(255,0,0,0.5);
-    position: relative;
-    top: -10px;
-}
-
 /* ===== Заголовок чата ===== */
 .chat-header {
     padding: 12px 20px;
@@ -876,6 +857,25 @@ select:focus {
 
 #sticker-panel img:hover {
     transform: scale(1.1);
+}
+
+/* ===== Бейдж непрочитанных ===== */
+.unread-badge {
+    background-color: #ff5555;
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    box-shadow: 0 0 5px rgba(255,0,0,0.5);
+    position: relative;
+    top: -10px;
 }
 
 /* ===== Контекстное меню ===== */

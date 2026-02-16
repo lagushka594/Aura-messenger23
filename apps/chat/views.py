@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q, OuterRef, Subquery, F, Count
+from django.db.models import Q, OuterRef, Subquery, F, Count, IntegerField
+from django.db.models.functions import Coalesce
 from django.http import Http404, JsonResponse, FileResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -14,11 +15,11 @@ import mimetypes
 
 @login_required
 def index(request):
-    # Аннотация непрочитанных сообщений и закрепления чата
+    # Подзапрос для количества непрочитанных сообщений
     unread_subquery = Message.objects.filter(
         conversation=OuterRef('pk'),
         timestamp__gt=OuterRef('conversationparticipant__last_read')
-    ).exclude(sender=request.user).values('id').annotate(cnt=Count('id')).values('cnt')
+    ).exclude(sender=request.user).values('conversation').annotate(cnt=Count('id')).values('cnt')
 
     conversations = Conversation.objects.filter(
         participants=request.user
@@ -26,7 +27,7 @@ def index(request):
         last_msg_content=Subquery(
             Message.objects.filter(conversation=OuterRef('pk')).order_by('-timestamp').values('content')[:1]
         ),
-        unread_count=Subquery(unread_subquery),
+        unread_count=Coalesce(Subquery(unread_subquery), 0, output_field=IntegerField()),
         is_pinned=Subquery(
             ConversationParticipant.objects.filter(
                 user=request.user,
@@ -400,7 +401,7 @@ def delete_message(request, message_id):
     )
     return JsonResponse({'status': 'ok'})
 
-# --- Боты (заглушка) ---
+# --- Боты (базовая заглушка) ---
 @login_required
 def bot_list(request):
     # from .models import Bot
