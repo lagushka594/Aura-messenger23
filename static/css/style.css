@@ -439,56 +439,110 @@ select:focus {
     margin-left: 8px;
 }
 
-/* ===== Поле ввода сообщения ===== */
+/* ===== Поле ввода сообщения (новая версия) ===== */
 .message-input {
     display: flex;
-    padding: 16px 20px;
+    align-items: center;
+    padding: 10px 20px;
     background-color: var(--sidebar-bg);
     border-top: 1px solid var(--border-color);
-    gap: 12px;
-    align-items: flex-end;
+    gap: 8px;
+}
+
+.attach-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
     flex-shrink: 0;
 }
 
-.message-input textarea {
+.attach-button:hover {
+    color: var(--primary);
+}
+
+.input-wrapper {
     flex: 1;
+    display: flex;
+    align-items: center;
     background-color: var(--dark-bg);
     border: 2px solid var(--border-color);
     border-radius: 24px;
-    padding: 14px 18px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--primary);
+}
+
+#chat-message {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 16px;
     color: var(--text-primary);
     font-family: inherit;
     resize: none;
     max-height: 120px;
     outline: none;
-    transition: border-color 0.2s;
+    font-size: 1rem;
 }
 
-.message-input textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(114, 137, 218, 0.3);
-}
-
-.message-input button {
-    background-color: var(--primary);
+#send-message {
+    background: none;
     border: none;
-    border-radius: 50%;
-    width: 52px;
-    height: 52px;
+    font-size: 1.5rem;
+    color: var(--primary);
+    cursor: pointer;
+    padding: 0 12px;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    color: white;
-    font-size: 1.4rem;
+    transition: color 0.2s;
     flex-shrink: 0;
-    padding: 0;
-    margin: 0;
-    transition: background-color 0.2s;
 }
 
-.message-input button:hover {
-    background-color: var(--accent-1);
+#send-message:hover {
+    color: var(--accent-1);
+}
+
+.emoji-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+.emoji-button:hover {
+    color: var(--primary);
+}
+
+/* Положение эмодзи-пикера */
+#emoji-picker {
+    bottom: 80px;
+    right: 20px;
+}
+
+/* Убедитесь, что старые стили не конфликтуют */
+.message-input button {
+    margin: 0;
 }
 
 /* ===== Эмодзи-пикер ===== */
@@ -520,21 +574,6 @@ select:focus {
 #emoji-picker span:hover {
     background-color: var(--hover-bg);
     transform: scale(1.2);
-}
-
-.emoji-button {
-    background: none !important;
-    border: none !important;
-    font-size: 1.5rem;
-    width: 44px;
-    height: 44px;
-    color: var(--text-secondary) !important;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.emoji-button:hover {
-    color: var(--primary) !important;
 }
 
 /* ===== Выпадающее меню канала ===== */
@@ -590,6 +629,46 @@ select:focus {
     z-index: 2000;
     box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     display: none;
+}
+
+/* ===== Модальное окно для предпросмотра изображений ===== */
+#image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 5000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#image-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+#modal-download {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 5001;
+}
+
+/* ===== Стили для изображений в сообщениях ===== */
+.chat-image {
+    max-width: 200px;
+    max-height: 200px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.chat-image:hover {
+    transform: scale(1.02);
 }
 
 /* ===== Стили для голосового чата ===== */
@@ -841,149 +920,7 @@ select:focus {
     cursor: pointer;
 }
 
-/* ===== Кнопка скрепки ===== */
-.attach-button {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s;
-}
-
-/* Модальное окно предпросмотра изображений */
-#image-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    z-index: 5000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-}
-
-#image-modal img {
-    max-width: 90%;
-    max-height: 90%;
-    object-fit: contain;
-}
-
-#modal-download {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    z-index: 5001;
-}
-
-/* Модальное окно */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.8);
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background-color: var(--sidebar-bg);
-    margin: auto;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    width: 80%;
-    max-width: 700px;
-    border-radius: 16px;
-    color: var(--text-primary);
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-}
-
-.close {
-    color: var(--text-secondary);
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    right: 20px;
-}
-
-.close:hover,
-.close:focus {
-    color: var(--neon);
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* Стили для изображений в сообщениях */
-.chat-image {
-    max-width: 200px;
-    max-height: 200px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: transform 0.2s;
-}
-
-.chat-image:hover {
-    transform: scale(1.02);
-}
-
-.attach-button:hover {
-    color: var(--primary);
-}
-
-/* ===== Адаптивность ===== */
-@media (max-width: 768px) {
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        z-index: 1000;
-        transform: translateX(-100%);
-        width: 85%;
-        max-width: 320px;
-        box-shadow: 2px 0 8px rgba(0,0,0,0.3);
-    }
-
-    .sidebar.open {
-        transform: translateX(0);
-    }
-
-    .mobile-menu-toggle {
-        display: flex;
-    }
-
-    .chat-area {
-        width: 100%;
-    }
-
-    .message {
-        max-width: 85%;
-    }
-
-    .chat-header-actions {
-        flex-direction: column;
-        align-items: flex-end;
-    }
-}
-
-/* Список файлов */
+/* ===== Список файлов ===== */
 .file-list {
     padding: 20px;
     max-width: 800px;
@@ -1039,4 +976,87 @@ select:focus {
 
 .file-item .btn {
     margin: 0;
+}
+
+/* ===== Модальное окно соглашения ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: var(--sidebar-bg);
+    margin: auto;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    width: 80%;
+    max-width: 700px;
+    border-radius: 16px;
+    color: var(--text-primary);
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.close {
+    color: var(--text-secondary);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--neon);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* ===== Адаптивность ===== */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 1000;
+        transform: translateX(-100%);
+        width: 85%;
+        max-width: 320px;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .mobile-menu-toggle {
+        display: flex;
+    }
+
+    .chat-area {
+        width: 100%;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+
+    .chat-header-actions {
+        flex-direction: column;
+        align-items: flex-end;
+    }
 }

@@ -16,7 +16,7 @@
             {% if conversation.type == 'group' and is_admin %}
                 <button class="btn btn-secondary" id="invite-btn">🔗 Пригласить</button>
             {% endif %}
-            {% if is_admin %}
+            {% if is_admin or conversation.type == 'private' %}
                 <a href="{% url 'chat:edit_channel' conversation.id %}" class="btn btn-secondary">⚙️ Настройки</a>
             {% endif %}
             <a href="{% url 'chat:voice_room' conversation.id %}" class="btn btn-secondary">🎙️ Голосовой канал</a>
@@ -84,7 +84,7 @@
                         {% if message.sticker %}
                             <img src="{{ message.sticker.image.url }}" alt="sticker" style="max-width: 128px; max-height: 128px;">
                         {% elif message.file %}
-                            {% if message.file.file_type|slice:":5" == "image" %}
+                            {% if message.file.file_type|slice:":5" == "image" or message.file.filename|lower|slice:"-4:" == ".jpg" or message.file.filename|lower|slice:"-4:" == ".png" or message.file.filename|lower|slice:"-5:" == ".jpeg" or message.file.filename|lower|slice:"-4:" == ".gif" or message.file.filename|lower|slice:"-5:" == ".webp" %}
                                 <img src="{{ message.file.file.url }}" alt="image" class="chat-image" style="max-width: 200px; max-height: 200px; cursor: pointer;" onclick="openImageModal('{{ message.file.file.url }}', '{{ message.file.filename }}')">
                             {% else %}
                                 <a href="{{ message.file.file.url }}" target="_blank">{{ message.file.filename }}</a>
@@ -105,13 +105,14 @@
         {% endfor %}
     </div>
 
-    <!-- Поле ввода и кнопки -->
+    <!-- Поле ввода и кнопки (обновлённая версия) -->
     <div class="message-input">
-        <input type="file" id="file-input" style="display: none;">
         <button id="attach-file" class="attach-button">📎</button>
-        <textarea id="chat-message" placeholder="Введите сообщение..."></textarea>
-        <button id="send-message">➤</button>
-        <button id="sticker-btn" class="btn btn-secondary" style="margin-left: 5px;">😊</button>
+        <div class="input-wrapper">
+            <textarea id="chat-message" placeholder="Введите сообщение..."></textarea>
+            <button id="send-message">➤</button>
+        </div>
+        <button id="emoji-button" class="emoji-button">😊</button>
         <div id="emoji-picker"></div>
     </div>
 

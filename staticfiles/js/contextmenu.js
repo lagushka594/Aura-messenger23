@@ -1,177 +1,194 @@
 // Контекстное меню для сообщений и чата
-document.addEventListener('DOMContentLoaded', function() {
-    // Меню для сообщений
-    const messageMenu = document.createElement('div');
-    messageMenu.id = 'message-context-menu';
-    messageMenu.className = 'context-menu';
-    messageMenu.innerHTML = `
-        <ul>
-            <li id="menu-reply">Ответить</li>
-            <li id="menu-forward">Переслать</li>
-            <li id="menu-pin">Закрепить</li>
-            <li id="menu-edit">Редактировать</li>
-            <li id="menu-delete">Удалить</li>
-            <li id="menu-download-file">Скачать файл</li>
-        </ul>
-    `;
-    document.body.appendChild(messageMenu);
+(function() {
+    // Вспомогательная функция для получения CSRF токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    window.getCookie = getCookie;
 
-    // Меню для чата (заголовок)
-    const chatMenu = document.createElement('div');
-    chatMenu.id = 'chat-context-menu';
-    chatMenu.className = 'context-menu';
-    chatMenu.innerHTML = `
-        <ul>
-            <li id="menu-pin-chat">Закрепить чат</li>
-            <li id="menu-delete-chat">Удалить чат</li>
-        </ul>
-    `;
-    document.body.appendChild(chatMenu);
+    let messageMenu, chatMenu;
+
+    function createMenus() {
+        if (!document.getElementById('message-context-menu')) {
+            messageMenu = document.createElement('div');
+            messageMenu.id = 'message-context-menu';
+            messageMenu.className = 'context-menu';
+            messageMenu.innerHTML = `
+                <ul>
+                    <li data-action="reply">Ответить</li>
+                    <li data-action="forward">Переслать</li>
+                    <li data-action="pin">Закрепить</li>
+                    <li data-action="edit">Редактировать</li>
+                    <li data-action="delete">Удалить</li>
+                    <li data-action="download-file">Скачать файл</li>
+                </ul>
+            `;
+            document.body.appendChild(messageMenu);
+        }
+
+        if (!document.getElementById('chat-context-menu')) {
+            chatMenu = document.createElement('div');
+            chatMenu.id = 'chat-context-menu';
+            chatMenu.className = 'context-menu';
+            chatMenu.innerHTML = `
+                <ul>
+                    <li data-action="pin-chat">Закрепить чат</li>
+                    <li data-action="delete-chat">Удалить чат</li>
+                </ul>
+            `;
+            document.body.appendChild(chatMenu);
+        }
+    }
 
     let currentMessageId = null;
     let currentMessageSenderId = null;
     let currentFileUrl = null;
     let currentFilename = null;
 
-    // Закрытие меню при клике вне
-    document.addEventListener('click', function(e) {
-        if (!messageMenu.contains(e.target) && e.target !== messageMenu) {
+    function handleMessageContextMenu(e) {
+        const messageDiv = e.target.closest('.message');
+        if (!messageDiv) return;
+
+        e.preventDefault();
+        currentMessageId = messageDiv.dataset.messageId;
+        currentMessageSenderId = parseInt(messageDiv.dataset.senderId);
+
+        // Проверяем, есть ли в сообщении файл
+        const fileLink = messageDiv.querySelector('a[href]');
+        const fileImg = messageDiv.querySelector('.chat-image');
+        if (fileLink) {
+            currentFileUrl = fileLink.href;
+            currentFilename = fileLink.textContent;
+        } else if (fileImg) {
+            currentFileUrl = fileImg.src;
+            currentFilename = 'image.jpg';
+        } else {
+            currentFileUrl = null;
+            currentFilename = null;
+        }
+
+        // Позиционирование меню
+        messageMenu.style.left = e.pageX + 'px';
+        messageMenu.style.top = e.pageY + 'px';
+        messageMenu.style.display = 'block';
+
+        // Скрыть пункты, недоступные для не-владельца
+        const isOwner = (currentMessageSenderId === window.currentUserId);
+        messageMenu.querySelector('[data-action="edit"]').style.display = isOwner ? 'block' : 'none';
+        messageMenu.querySelector('[data-action="delete"]').style.display = isOwner ? 'block' : 'none';
+        messageMenu.querySelector('[data-action="pin"]').style.display = isOwner ? 'block' : 'none';
+        messageMenu.querySelector('[data-action="download-file"]').style.display = currentFileUrl ? 'block' : 'none';
+    }
+
+    function handleChatContextMenu(e) {
+        const chatHeader = e.target.closest('.chat-header');
+        if (!chatHeader) return;
+
+        e.preventDefault();
+        chatMenu.style.left = e.pageX + 'px';
+        chatMenu.style.top = e.pageY + 'px';
+        chatMenu.style.display = 'block';
+    }
+
+    function handleMenuClick(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
+
+        const action = target.dataset.action;
+
+        if (action.startsWith('pin-chat') || action.startsWith('delete-chat')) {
+            // Меню чата
+            switch (action) {
+                case 'pin-chat':
+                    if (window.conversationId) {
+                        window.location.href = `/chat/pin/${window.conversationId}/`;
+                    }
+                    break;
+                case 'delete-chat':
+                    if (window.conversationId && confirm('Удалить этот чат?')) {
+                        window.location.href = `/chat/delete_chat/${window.conversationId}/`;
+                    }
+                    break;
+            }
+            chatMenu.style.display = 'none';
+            return;
+        }
+
+        // Меню сообщения
+        if (!currentMessageId) return;
+
+        switch (action) {
+            case 'reply':
+                window.location.href = `/chat/reply/${currentMessageId}/`;
+                break;
+            case 'forward':
+                window.location.href = `/chat/forward/${currentMessageId}/`;
+                break;
+            case 'pin':
+                fetch(`/chat/pin_message/${currentMessageId}/`, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': getCookie('csrftoken')}
+                }).then(() => window.location.reload());
+                break;
+            case 'edit':
+                window.location.href = `/chat/edit_message/${currentMessageId}/`;
+                break;
+            case 'delete':
+                if (confirm('Удалить сообщение?')) {
+                    fetch(`/chat/delete_message/${currentMessageId}/`, {
+                        method: 'POST',
+                        headers: {'X-CSRFToken': getCookie('csrftoken')}
+                    }).then(response => response.json()).then(data => {
+                        if (data.status === 'ok') {
+                            document.getElementById('msg-' + currentMessageId).remove();
+                        }
+                    });
+                }
+                break;
+            case 'download-file':
+                if (currentFileUrl) {
+                    const a = document.createElement('a');
+                    a.href = currentFileUrl;
+                    a.download = currentFilename || 'file';
+                    a.click();
+                }
+                break;
+        }
+        messageMenu.style.display = 'none';
+    }
+
+    function closeMenus(e) {
+        if (messageMenu && !messageMenu.contains(e.target)) {
             messageMenu.style.display = 'none';
         }
-        if (!chatMenu.contains(e.target) && e.target !== chatMenu) {
+        if (chatMenu && !chatMenu.contains(e.target)) {
             chatMenu.style.display = 'none';
         }
-    });
-
-    // Открытие меню для сообщений
-    document.addEventListener('contextmenu', function(e) {
-        const messageDiv = e.target.closest('.message');
-        if (messageDiv) {
-            e.preventDefault();
-            currentMessageId = messageDiv.dataset.messageId;
-            currentMessageSenderId = parseInt(messageDiv.dataset.senderId);
-            currentConversationId = window.conversationId;
-
-            // Проверяем, есть ли в сообщении файл
-            const fileLink = messageDiv.querySelector('a[href]');
-            const fileImg = messageDiv.querySelector('.chat-image');
-            if (fileLink) {
-                currentFileUrl = fileLink.href;
-                currentFilename = fileLink.textContent;
-            } else if (fileImg) {
-                currentFileUrl = fileImg.src;
-                currentFilename = 'image.jpg';
-            } else {
-                currentFileUrl = null;
-                currentFilename = null;
-            }
-
-            messageMenu.style.left = e.pageX + 'px';
-            messageMenu.style.top = e.pageY + 'px';
-            messageMenu.style.display = 'block';
-
-            const isOwner = (currentMessageSenderId === window.currentUserId);
-            document.getElementById('menu-edit').style.display = isOwner ? 'block' : 'none';
-            document.getElementById('menu-delete').style.display = isOwner ? 'block' : 'none';
-            document.getElementById('menu-pin').style.display = isOwner ? 'block' : 'none';
-            document.getElementById('menu-download-file').style.display = currentFileUrl ? 'block' : 'none';
-        } else {
-            const chatHeader = e.target.closest('.chat-header');
-            if (chatHeader) {
-                e.preventDefault();
-                chatMenu.style.left = e.pageX + 'px';
-                chatMenu.style.top = e.pageY + 'px';
-                chatMenu.style.display = 'block';
-            }
-        }
-    });
-
-    // Обработчики пунктов меню сообщений
-    document.getElementById('menu-reply').addEventListener('click', function() {
-        if (currentMessageId) {
-            window.location.href = `/chat/reply/${currentMessageId}/`;
-        }
-        messageMenu.style.display = 'none';
-    });
-
-    document.getElementById('menu-forward').addEventListener('click', function() {
-        if (currentMessageId) {
-            window.location.href = `/chat/forward/${currentMessageId}/`;
-        }
-        messageMenu.style.display = 'none';
-    });
-
-    document.getElementById('menu-pin').addEventListener('click', function() {
-        if (currentMessageId) {
-            fetch(`/chat/pin_message/${currentMessageId}/`, {
-                method: 'POST',
-                headers: {'X-CSRFToken': getCookie('csrftoken')}
-            }).then(() => window.location.reload());
-        }
-        messageMenu.style.display = 'none';
-    });
-
-    document.getElementById('menu-edit').addEventListener('click', function() {
-        if (currentMessageId) {
-            window.location.href = `/chat/edit_message/${currentMessageId}/`;
-        }
-        messageMenu.style.display = 'none';
-    });
-
-    document.getElementById('menu-delete').addEventListener('click', function() {
-        if (currentMessageId && confirm('Удалить сообщение?')) {
-            fetch(`/chat/delete_message/${currentMessageId}/`, {
-                method: 'POST',
-                headers: {'X-CSRFToken': getCookie('csrftoken')}
-            }).then(response => response.json()).then(data => {
-                if (data.status === 'ok') {
-                    document.getElementById('msg-' + currentMessageId).remove();
-                }
-            });
-        }
-        messageMenu.style.display = 'none';
-    });
-
-    document.getElementById('menu-download-file').addEventListener('click', function() {
-        if (currentFileUrl) {
-            const a = document.createElement('a');
-            a.href = currentFileUrl;
-            a.download = currentFilename || 'file';
-            a.click();
-        }
-        messageMenu.style.display = 'none';
-    });
-
-    // Обработчики меню чата
-    document.getElementById('menu-pin-chat').addEventListener('click', function() {
-        if (window.conversationId) {
-            window.location.href = `/chat/pin/${window.conversationId}/`;
-        }
-        chatMenu.style.display = 'none';
-    });
-
-    document.getElementById('menu-delete-chat').addEventListener('click', function() {
-        if (window.conversationId && confirm('Удалить этот чат?')) {
-            window.location.href = `/chat/delete_chat/${window.conversationId}/`;
-        }
-        chatMenu.style.display = 'none';
-    });
-
-    // Вспомогательная функция для получения CSRF токена
-    if (typeof getCookie === 'undefined') {
-        window.getCookie = function(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        };
     }
-});
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+        createMenus();
+
+        document.addEventListener('contextmenu', function(e) {
+            handleMessageContextMenu(e);
+            handleChatContextMenu(e);
+        });
+
+        document.addEventListener('click', closeMenus);
+
+        // Обработка кликов по пунктам меню через делегирование
+        document.addEventListener('click', handleMenuClick);
+    });
+})();
