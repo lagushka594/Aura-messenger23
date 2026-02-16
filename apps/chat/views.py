@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, OuterRef, Subquery, F, Count
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, FileResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite, FileMessage, VoiceRoom, StickerPack, Sticker, PinnedMessage
@@ -10,6 +10,7 @@ from apps.users.models import User
 from .forms import CreateGroupForm, CreatePrivateChatForm, EditChannelForm
 import secrets
 import os
+import mimetypes
 
 @login_required
 def index(request):
@@ -255,7 +256,6 @@ def upload_file(request, conversation_id):
 def edit_channel(request, conversation_id):
     conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
     participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
-    # Разрешаем редактирование, если пользователь администратор ИЛИ это личный чат/избранное
     if not (participant.is_admin or conversation.type in ['private', 'favorite']):
         messages.error(request, 'Недостаточно прав')
         return redirect('chat:room', conversation_id=conversation.id)
@@ -403,8 +403,12 @@ def delete_message(request, message_id):
 # --- Боты (базовая заглушка) ---
 @login_required
 def bot_list(request):
-    bots = Bot.objects.filter(owner=request.user)
-    return render(request, 'chat/bot_list.html', {'bots': bots})
+    # Убедитесь, что модель Bot импортирована, или закомментируйте, если не используется
+    # from .models import Bot
+    # bots = Bot.objects.filter(owner=request.user)
+    # return render(request, 'chat/bot_list.html', {'bots': bots})
+    messages.info(request, 'Функция ботов в разработке')
+    return redirect('chat:index')
 
 # --- Закрепление чата ---
 @login_required
@@ -492,10 +496,23 @@ def file_list(request, conversation_id):
     files = FileMessage.objects.filter(message__conversation=conversation).order_by('-message__timestamp')
     return render(request, 'chat/file_list.html', {'conversation': conversation, 'files': files})
 
-# --- Скачивание файла (альтернативный метод) ---
+# --- Скачивание файла (исправлено) ---
 @login_required
 def download_file(request, file_id):
     file_msg = get_object_or_404(FileMessage, id=file_id)
+    # Проверяем, что пользователь участник чата
     if request.user not in file_msg.message.conversation.participants.all():
         raise Http404
-    return redirect(file_msg.file.url)
+    # Получаем путь к файлу
+    file_path = file_msg.file.path
+    # Проверяем, существует ли файл на диске
+    if not os.path.exists(file_path):
+        raise Http404("Файл не найден на сервере")
+    # Определяем MIME-тип
+    content_type, encoding = mimetypes.guess_type(file_path)
+    if content_type is None:
+        content_type = 'application/octet-stream'
+    # Отдаём файл
+    response = FileResponse(open(file_path, 'rb'), content_type=content_type)
+    response['Content-Disposition'] = f'attachment; filename="{file_msg.filename}"'
+    return response
