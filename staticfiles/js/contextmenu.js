@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <li id="menu-pin">Закрепить</li>
             <li id="menu-edit">Редактировать</li>
             <li id="menu-delete">Удалить</li>
+            <li id="menu-download-file">Скачать файл</li>
         </ul>
     `;
     document.body.appendChild(messageMenu);
@@ -29,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let currentMessageId = null;
     let currentMessageSenderId = null;
-    let currentConversationId = null;
+    let currentFileUrl = null;
+    let currentFilename = null;
 
     // Закрытие меню при клике вне
     document.addEventListener('click', function(e) {
@@ -50,6 +52,20 @@ document.addEventListener('DOMContentLoaded', function() {
             currentMessageSenderId = parseInt(messageDiv.dataset.senderId);
             currentConversationId = window.conversationId;
 
+            // Проверяем, есть ли в сообщении файл
+            const fileLink = messageDiv.querySelector('a[href]');
+            const fileImg = messageDiv.querySelector('.chat-image');
+            if (fileLink) {
+                currentFileUrl = fileLink.href;
+                currentFilename = fileLink.textContent;
+            } else if (fileImg) {
+                currentFileUrl = fileImg.src;
+                currentFilename = 'image.jpg';
+            } else {
+                currentFileUrl = null;
+                currentFilename = null;
+            }
+
             messageMenu.style.left = e.pageX + 'px';
             messageMenu.style.top = e.pageY + 'px';
             messageMenu.style.display = 'block';
@@ -58,6 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('menu-edit').style.display = isOwner ? 'block' : 'none';
             document.getElementById('menu-delete').style.display = isOwner ? 'block' : 'none';
             document.getElementById('menu-pin').style.display = isOwner ? 'block' : 'none';
+            document.getElementById('menu-download-file').style.display = currentFileUrl ? 'block' : 'none';
         } else {
             const chatHeader = e.target.closest('.chat-header');
             if (chatHeader) {
@@ -111,6 +128,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('msg-' + currentMessageId).remove();
                 }
             });
+        }
+        messageMenu.style.display = 'none';
+    });
+
+    document.getElementById('menu-download-file').addEventListener('click', function() {
+        if (currentFileUrl) {
+            const a = document.createElement('a');
+            a.href = currentFileUrl;
+            a.download = currentFilename || 'file';
+            a.click();
         }
         messageMenu.style.display = 'none';
     });

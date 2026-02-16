@@ -20,6 +20,7 @@
                 <a href="{% url 'chat:edit_channel' conversation.id %}" class="btn btn-secondary">⚙️ Настройки</a>
             {% endif %}
             <a href="{% url 'chat:voice_room' conversation.id %}" class="btn btn-secondary">🎙️ Голосовой канал</a>
+            <a href="{% url 'chat:file_list' conversation.id %}" class="btn btn-secondary">📁 Файлы</a>
         </div>
     </div>
 

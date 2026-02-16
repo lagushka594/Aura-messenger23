@@ -17,6 +17,12 @@
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Сохранить</button>
     </form>
+
+    <hr style="margin: 20px 0; border-color: var(--border-color);">
+
+    <h3>Опасная зона</h3>
+    <a href="{% url 'chat:delete_chat' conversation.id %}" class="btn btn-danger" onclick="return confirm('Вы уверены, что хотите удалить этот чат? Это действие нельзя отменить.')">🗑️ Удалить чат</a>
+
     <p><a href="{% url 'chat:room' conversation.id %}" class="back-link">← Назад к чату</a></p>
 </div>
 {% endblock %}

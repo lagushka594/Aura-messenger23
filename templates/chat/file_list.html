@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="file-list">
+    <div class="file-list-header">
+        <h2>Файлы чата: {{ conversation.name|default:'Личный чат' }}</h2>
+        <a href="{% url 'chat:room' conversation.id %}" class="btn btn-primary">← Назад к чату</a>
+    </div>
+
+    <div class="files">
+        {% if files %}
+            <ul>
+                {% for file in files %}
+                <li>
+                    <div class="file-item">
+                        {% if file.file_type|slice:":5" == "image" %}
+                            <img src="{{ file.file.url }}" alt="{{ file.filename }}" style="max-width: 100px; max-height: 100px; cursor: pointer;" onclick="openImageModal('{{ file.file.url }}', '{{ file.filename }}')">
+                        {% else %}
+                            <span class="file-icon">📄</span>
+                        {% endif %}
+                        <div class="file-info">
+                            <strong>{{ file.filename }}</strong><br>
+                            <small>{{ file.file_size|filesizeformat }} | {{ file.message.timestamp }}</small>
+                        </div>
+                        <a href="{{ file.file.url }}" target="_blank" class="btn btn-primary">Просмотр</a>
+                        <a href="{% url 'chat:download_file' file.id %}" class="btn btn-secondary">Скачать</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>В этом чате пока нет файлов.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function openImageModal(imageUrl, filename) {
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-image');
+        const downloadBtn = document.getElementById('modal-download');
+        modalImg.src = imageUrl;
+        downloadBtn.onclick = function() {
+            const a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = filename || 'image.jpg';
+            a.click();
+        };
+        modal.style.display = 'flex';
+    }
+</script>
+{% endblock %}

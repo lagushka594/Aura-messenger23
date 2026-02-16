@@ -483,3 +483,18 @@ def reply_message(request, message_id):
 def forward_message(request, message_id):
     messages.info(request, 'Функция в разработке')
     return redirect('chat:room', conversation_id=get_object_or_404(Message, id=message_id).conversation.id)
+
+# --- Просмотр всех файлов чата ---
+@login_required
+def file_list(request, conversation_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    files = FileMessage.objects.filter(message__conversation=conversation).order_by('-message__timestamp')
+    return render(request, 'chat/file_list.html', {'conversation': conversation, 'files': files})
+
+# --- Скачивание файла (альтернативный метод) ---
+@login_required
+def download_file(request, file_id):
+    file_msg = get_object_or_404(FileMessage, id=file_id)
+    if request.user not in file_msg.message.conversation.participants.all():
+        raise Http404
+    return redirect(file_msg.file.url)

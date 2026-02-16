@@ -43,4 +43,7 @@ urlpatterns = [
     # Ответ и пересылка
     path('reply/<int:message_id>/', views.reply_message, name='reply_message'),
     path('forward/<int:message_id>/', views.forward_message, name='forward_message'),
+    # Просмотр файлов
+    path('files/<int:conversation_id>/', views.file_list, name='file_list'),
+    path('download/<int:file_id>/', views.download_file, name='download_file'),
 ]
