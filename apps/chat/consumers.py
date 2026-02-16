@@ -121,13 +121,11 @@ class VoiceConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # Получаем голосовую комнату асинхронно
         self.voice_room = await self.get_voice_room()
         if not self.voice_room:
             await self.close()
             return
 
-        # Проверяем, есть ли пользователь в активных
         if not await self.user_in_room():
             await self.close()
             return
