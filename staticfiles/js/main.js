@@ -37,9 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Кнопка скрепки для загрузки файлов
     const attachBtn = document.getElementById('attach-file');
     if (attachBtn) {
-        attachBtn.addEventListener('click', function() {
+        attachBtn.addEventListener('click', function(e) {
+            console.log('Attach button clicked'); // отладка
             const fileInput = document.getElementById('file-input');
-            if (fileInput) fileInput.click();
+            if (fileInput) {
+                fileInput.click();
+            }
         });
     }
 
@@ -48,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileInput.addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (file && window.conversationId) {
+                console.log('File selected:', file.name);
                 const formData = new FormData();
                 formData.append('file', file);
                 try {
@@ -61,6 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!response.ok) throw new Error('Upload failed');
                     const data = await response.json();
                     console.log('File uploaded:', data);
+                    // Очищаем input, чтобы можно было загрузить тот же файл повторно
+                    fileInput.value = '';
                 } catch (error) {
                     console.error('Upload error:', error);
                     alert('Не удалось загрузить файл');
@@ -70,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Функция для drag-and-drop (та же)
+// Функция для drag-and-drop
 function initFileDragAndDrop(conversationId) {
     const dropZone = document.querySelector('.chat-area');
     if (!dropZone) return;
@@ -124,19 +130,20 @@ function initFileDragAndDrop(conversationId) {
             }
         }
     }
+}
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+// Вспомогательная функция для получения CSRF токена
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
+    return cookieValue;
 }

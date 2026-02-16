@@ -37,9 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Кнопка скрепки для загрузки файлов
     const attachBtn = document.getElementById('attach-file');
     if (attachBtn) {
-        attachBtn.addEventListener('click', function() {
+        attachBtn.addEventListener('click', function(e) {
+            console.log('Attach button clicked'); // отладка
             const fileInput = document.getElementById('file-input');
-            if (fileInput) fileInput.click();
+            if (fileInput) {
+                fileInput.click();
+            }
         });
     }
 
@@ -48,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fileInput.addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (file && window.conversationId) {
+                console.log('File selected:', file.name);
                 const formData = new FormData();
                 formData.append('file', file);
                 try {
