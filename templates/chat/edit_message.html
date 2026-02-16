@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="form-container">
+    <h2>Редактировать сообщение</h2>
+    <form method="post" onsubmit="return submitForm(event)">
+        {% csrf_token %}
+        <textarea name="content" rows="4" cols="50" required>{{ message.content }}</textarea>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+    <p><a href="{% url 'chat:room' message.conversation.id %}" class="back-link">← Назад к чату</a></p>
+</div>
+<script>
+function submitForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value}
+    }).then(response => response.json()).then(data => {
+        if (data.status === 'ok') {
+            window.location.href = "{% url 'chat:room' message.conversation.id %}";
+        }
+    });
+    return false;
+}
+</script>
+{% endblock %}

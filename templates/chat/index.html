@@ -6,7 +6,10 @@
         <h1>Чаты</h1>
         <a href="{% url 'chat:create_chat' %}" class="btn btn-primary">➕ Создать</a>
     </div>
-    <ul class="conversation-list">
+    <div class="search-container">
+        <input type="text" id="search-chats" placeholder="Поиск чатов..." class="form-control">
+    </div>
+    <ul class="conversation-list" id="chat-list">
         {% for conv in conversations %}
         <li>
             <a href="{% url 'chat:room' conv.id %}">
@@ -19,6 +22,9 @@
                     <span class="conversation-name">
                         {% if conv.type == 'favorite' %}⭐ {% endif %}
                         {{ conv.name|default:'Личный чат' }}
+                        {% if conv.unread_count %}
+                            <span class="unread-badge">{{ conv.unread_count }}</span>
+                        {% endif %}
                     </span>
                     <span class="last-message">{{ conv.last_msg_content|truncatechars:30 }}</span>
                 </div>
@@ -32,4 +38,14 @@
         {% endfor %}
     </ul>
 </div>
+
+<script>
+document.getElementById('search-chats').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    document.querySelectorAll('#chat-list li').forEach(li => {
+        const name = li.querySelector('.conversation-name').textContent.toLowerCase();
+        li.style.display = name.includes(query) ? '' : 'none';
+    });
+});
+</script>
 {% endblock %}

@@ -45,12 +45,15 @@ class ConversationParticipant(models.Model):
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    content = models.TextField()
+    content = models.TextField(blank=True)  # может быть пустым для стикеров
+    sticker = models.ForeignKey('Sticker', on_delete=models.SET_NULL, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
     is_read = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.sender}: {self.content[:20]}'
+        return f'{self.sender}: {self.content[:20] if self.content else "Стикер"}'
 
 class FileMessage(models.Model):
     message = models.OneToOneField(Message, on_delete=models.CASCADE, related_name='file')
@@ -58,6 +61,25 @@ class FileMessage(models.Model):
     filename = models.CharField(max_length=255)
     file_size = models.IntegerField()
     file_type = models.CharField(max_length=100, blank=True)
+
+class StickerPack(models.Model):
+    name = models.CharField(max_length=100)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_official = models.BooleanField(default=False)
+    cover = models.ImageField(upload_to='sticker_packs/', blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+class Sticker(models.Model):
+    pack = models.ForeignKey(StickerPack, on_delete=models.CASCADE, related_name='stickers')
+    image = models.ImageField(upload_to='stickers/')
+    emoji = models.CharField(max_length=10, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Sticker {self.id} from {self.pack.name}'
 
 class Invite(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='invites')
@@ -72,7 +94,6 @@ class Invite(models.Model):
         return f'Invite to {self.conversation.name} by {self.created_by.username}'
 
 class VoiceRoom(models.Model):
-    """Голосовая комната, связанная с беседой (для групповых голосовых каналов)"""
     conversation = models.OneToOneField(Conversation, on_delete=models.CASCADE, related_name='voice_room')
     name = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -81,6 +102,31 @@ class VoiceRoom(models.Model):
 
     def __str__(self):
         return f'Voice room for {self.conversation.name}'
+
+class Bot(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bots')
+    name = models.CharField(max_length=100)
+    token = models.CharField(max_length=64, unique=True, default=secrets.token_urlsafe)
+    webhook_url = models.URLField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class BotCommand(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='commands')
+    command = models.CharField(max_length=50)
+    response = models.TextField()
+
+class BotParticipant(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+    added_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('bot', 'conversation')
 
 class Server(models.Model):
     name = models.CharField(max_length=100)

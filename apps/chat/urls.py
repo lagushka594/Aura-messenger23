@@ -25,4 +25,12 @@ urlpatterns = [
     path('voice/<int:conversation_id>/', views.voice_room, name='voice_room'),
     path('voice/join/<int:voice_room_id>/', views.join_voice, name='join_voice'),
     path('voice/leave/<int:voice_room_id>/', views.leave_voice, name='leave_voice'),
+    # Стикеры
+    path('stickers/', views.sticker_packs, name='sticker_packs'),
+    path('send_sticker/<int:conversation_id>/<int:sticker_id>/', views.send_sticker, name='send_sticker'),
+    # Редактирование/удаление сообщений
+    path('edit_message/<int:message_id>/', views.edit_message, name='edit_message'),
+    path('delete_message/<int:message_id>/', views.delete_message, name='delete_message'),
+    # Боты
+    path('bots/', views.bot_list, name='bot_list'),
 ]

@@ -1,11 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q, OuterRef, Subquery, F
+from django.db.models import Q, OuterRef, Subquery, F, Count
 from django.http import Http404, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite, FileMessage, VoiceRoom
+from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite, FileMessage, VoiceRoom, StickerPack, Sticker, Bot, BotCommand, BotParticipant
 from apps.users.models import User
 from .forms import CreateGroupForm, CreatePrivateChatForm, EditChannelForm
 import secrets
@@ -13,12 +13,19 @@ import os
 
 @login_required
 def index(request):
+    # Аннотация непрочитанных сообщений
+    unread_subquery = Message.objects.filter(
+        conversation=OuterRef('pk'),
+        timestamp__gt=OuterRef('conversationparticipant__last_read')
+    ).exclude(sender=request.user).values('id').annotate(cnt=Count('id')).values('cnt')
+
     conversations = Conversation.objects.filter(
         participants=request.user
     ).annotate(
         last_msg_content=Subquery(
             Message.objects.filter(conversation=OuterRef('pk')).order_by('-timestamp').values('content')[:1]
-        )
+        ),
+        unread_count=Subquery(unread_subquery)
     ).order_by(
         F('last_message__timestamp').desc(nulls_last=True)
     ).select_related('last_message')
@@ -44,9 +51,14 @@ def room(request, conversation_id):
         except User.DoesNotExist:
             raise Http404("Чат не найден")
     
+    # Помечаем сообщения как прочитанные
     Message.objects.filter(conversation=conversation).exclude(sender=request.user).update(is_read=True)
-    messages_list = Message.objects.filter(conversation=conversation).select_related('sender').prefetch_related('file').order_by('timestamp')
+    # Обновляем last_read
     participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
+    participant.last_read = timezone.now()
+    participant.save()
+    
+    messages_list = Message.objects.filter(conversation=conversation).select_related('sender', 'sticker').prefetch_related('file').order_by('timestamp')
     is_admin = participant.is_admin or conversation.type in ['private', 'favorite']
     
     invites = None
@@ -59,6 +71,9 @@ def room(request, conversation_id):
     except VoiceRoom.DoesNotExist:
         pass
     
+    # Для стикеров
+    sticker_packs = StickerPack.objects.all().prefetch_related('stickers')
+    
     return render(request, 'chat/room.html', {
         'conversation': conversation,
         'messages': messages_list,
@@ -66,6 +81,7 @@ def room(request, conversation_id):
         'invites': invites,
         'participant': participant,
         'voice_room': voice_room,
+        'sticker_packs': sticker_packs,
     })
 
 @login_required
@@ -292,3 +308,85 @@ def leave_voice(request, voice_room_id):
         }
     )
     return redirect('chat:room', conversation_id=voice_room.conversation.id)
+
+# --- Стикеры ---
+@login_required
+def sticker_packs(request):
+    packs = StickerPack.objects.all().prefetch_related('stickers')
+    return render(request, 'chat/sticker_packs.html', {'packs': packs})
+
+@login_required
+def send_sticker(request, conversation_id, sticker_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    sticker = get_object_or_404(Sticker, id=sticker_id)
+    message = Message.objects.create(
+        conversation=conversation,
+        sender=request.user,
+        sticker=sticker,
+        content=''
+    )
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'chat_{conversation_id}',
+        {
+            'type': 'chat_message',
+            'id': message.id,
+            'sender_id': request.user.id,
+            'sender_name': request.user.get_display_name(),
+            'sender_avatar': request.user.avatar.url if request.user.avatar else None,
+            'content': '',
+            'sticker_id': sticker.id,
+            'sticker_url': sticker.image.url,
+            'timestamp': message.timestamp.isoformat(),
+        }
+    )
+    return redirect('chat:room', conversation_id=conversation.id)
+
+# --- Редактирование и удаление сообщений ---
+@login_required
+def edit_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id, sender=request.user)
+    if request.method == 'POST':
+        new_content = request.POST.get('content')
+        message.content = new_content
+        message.edited_at = timezone.now()
+        message.save()
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'chat_{message.conversation.id}',
+            {
+                'type': 'edit_message',
+                'id': message.id,
+                'content': new_content,
+                'edited_at': message.edited_at.isoformat(),
+            }
+        )
+        return JsonResponse({'status': 'ok'})
+    return render(request, 'chat/edit_message.html', {'message': message})
+
+@login_required
+def delete_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id, sender=request.user)
+    message.deleted = True
+    message.save()
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'chat_{message.conversation.id}',
+        {
+            'type': 'delete_message',
+            'id': message.id,
+        }
+    )
+    return JsonResponse({'status': 'ok'})
+
+# --- Боты (базовая заглушка) ---
+@login_required
+def bot_list(request):
+    bots = Bot.objects.filter(owner=request.user)
+    return render(request, 'chat/bot_list.html', {'bots': bots})

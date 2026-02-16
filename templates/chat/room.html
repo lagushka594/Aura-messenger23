@@ -47,28 +47,61 @@
         <button class="btn btn-secondary" onclick="document.getElementById('invite-modal').style.display='none'">Закрыть</button>
     </div>
 
+    <!-- Поле поиска по сообщениям -->
+    <div class="search-messages">
+        <input type="text" id="search-messages" placeholder="Поиск в чате..." class="form-control">
+    </div>
+
+    <!-- Контейнер сообщений -->
     <div class="messages" id="message-list">
         {% for message in messages %}
-        <div class="message {% if message.sender == user %}own{% endif %}" id="msg-{{ message.id }}">
-            <img src="{% if message.sender.avatar %}{{ message.sender.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-tiny">
-            <div class="message-bubble">
-                <span class="message-sender">{{ message.sender.get_display_name }}</span>
-                <div class="message-content">
-                    {% if message.file %}
-                        <a href="{{ message.file.file.url }}" target="_blank">{{ message.file.filename }}</a>
-                    {% else %}
-                        {{ message.content }}
+            {% if not message.deleted %}
+            <div class="message {% if message.sender == user %}own{% endif %}" id="msg-{{ message.id }}">
+                <img src="{% if message.sender.avatar %}{{ message.sender.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-tiny">
+                <div class="message-bubble">
+                    <span class="message-sender">{{ message.sender.get_display_name }}</span>
+                    <div class="message-content">
+                        {% if message.sticker %}
+                            <img src="{{ message.sticker.image.url }}" alt="sticker" style="max-width: 128px; max-height: 128px;">
+                        {% elif message.file %}
+                            <a href="{{ message.file.file.url }}" target="_blank">{{ message.file.filename }}</a>
+                        {% else %}
+                            {{ message.content }}
+                        {% endif %}
+                        {% if message.edited_at %}
+                            <span class="edited">(изменено)</span>
+                        {% endif %}
+                    </div>
+                    <span class="message-time">{{ message.timestamp|time:"H:i" }}</span>
+                    {% if message.sender == user %}
+                    <div class="message-actions">
+                        <a href="{% url 'chat:edit_message' message.id %}" class="btn-edit">✎</a>
+                        <button class="btn-delete" onclick="deleteMessage({{ message.id }})">🗑️</button>
+                    </div>
                     {% endif %}
                 </div>
-                <span class="message-time">{{ message.timestamp|time:"H:i" }}</span>
             </div>
-        </div>
+            {% endif %}
+        {% empty %}
+            <p style="text-align: center; color: var(--text-secondary);">Пока нет сообщений</p>
         {% endfor %}
     </div>
+
+    <!-- Поле ввода и кнопки -->
     <div class="message-input">
         <textarea id="chat-message" placeholder="Введите сообщение..."></textarea>
         <button id="send-message">➤</button>
+        <button id="sticker-btn" class="btn btn-secondary" style="margin-left: 5px;">😊</button>
         <div id="emoji-picker"></div>
+    </div>
+
+    <!-- Панель стикеров -->
+    <div id="sticker-panel">
+        {% for pack in sticker_packs %}
+            {% for sticker in pack.stickers.all %}
+                <img src="{{ sticker.image.url }}" onclick="sendSticker({{ sticker.id }})" alt="sticker">
+            {% endfor %}
+        {% endfor %}
     </div>
 </div>
 
@@ -76,6 +109,7 @@
     window.currentUserId = {{ user.id }};
     const conversationId = {{ conversation.id }};
 
+    // Меню канала
     document.getElementById('chat-title').addEventListener('click', function(e) {
         const menu = document.getElementById('channel-menu');
         menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
@@ -89,6 +123,7 @@
         }
     });
 
+    // Приглашение
     document.getElementById('invite-btn')?.addEventListener('click', function() {
         fetch("{% url 'chat:create_invite' conversation.id %}", {
             headers: {'X-Requested-With': 'XMLHttpRequest'}
@@ -117,6 +152,61 @@
             alert('Не удалось создать приглашение');
         });
     });
+
+    // Стикеры
+    function sendSticker(stickerId) {
+        fetch(`/chat/send_sticker/{{ conversation.id }}/${stickerId}/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCookie('csrftoken')}
+        }).then(() => {
+            // Можно обновить через WebSocket, но для простоты перезагрузим
+            window.location.reload();
+        });
+    }
+
+    document.getElementById('sticker-btn')?.addEventListener('click', () => {
+        const panel = document.getElementById('sticker-panel');
+        panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Удаление сообщения
+    function deleteMessage(messageId) {
+        if (confirm('Удалить сообщение?')) {
+            fetch(`/chat/delete_message/${messageId}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': getCookie('csrftoken')}
+            }).then(response => response.json()).then(data => {
+                if (data.status === 'ok') {
+                    document.getElementById('msg-' + messageId).remove();
+                }
+            });
+        }
+    }
+
+    // Поиск по сообщениям
+    document.getElementById('search-messages').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        document.querySelectorAll('#message-list .message').forEach(msg => {
+            const text = msg.querySelector('.message-content').textContent.toLowerCase();
+            msg.style.display = text.includes(query) ? 'flex' : 'none';
+        });
+    });
+
+    // Функция для получения CSRF токена
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 </script>
 {% endblock %}
 

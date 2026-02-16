@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Conversation, ConversationParticipant, Message, Server, ServerMember, Channel
+from .models import Conversation, ConversationParticipant, Message, FileMessage, StickerPack, Sticker, Invite, VoiceRoom, Bot, BotCommand, BotParticipant, Server, ServerMember, Channel
 
 class ConversationParticipantInline(admin.TabularInline):
     model = ConversationParticipant
@@ -12,8 +12,40 @@ class ConversationAdmin(admin.ModelAdmin):
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'conversation', 'sender', 'timestamp', 'is_read')
-    list_filter = ('is_read', 'timestamp')
+    list_display = ('id', 'conversation', 'sender', 'timestamp', 'is_read', 'deleted')
+    list_filter = ('is_read', 'deleted')
+
+@admin.register(FileMessage)
+class FileMessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'message', 'filename', 'file_size')
+
+@admin.register(StickerPack)
+class StickerPackAdmin(admin.ModelAdmin):
+    list_display = ('name', 'author', 'created_at', 'is_official')
+
+@admin.register(Sticker)
+class StickerAdmin(admin.ModelAdmin):
+    list_display = ('id', 'pack', 'emoji')
+
+@admin.register(Invite)
+class InviteAdmin(admin.ModelAdmin):
+    list_display = ('id', 'conversation', 'created_by', 'token', 'uses')
+
+@admin.register(VoiceRoom)
+class VoiceRoomAdmin(admin.ModelAdmin):
+    list_display = ('id', 'conversation', 'name', 'is_active')
+
+@admin.register(Bot)
+class BotAdmin(admin.ModelAdmin):
+    list_display = ('name', 'owner', 'is_active')
+
+@admin.register(BotCommand)
+class BotCommandAdmin(admin.ModelAdmin):
+    list_display = ('bot', 'command', 'response')
+
+@admin.register(BotParticipant)
+class BotParticipantAdmin(admin.ModelAdmin):
+    list_display = ('bot', 'conversation', 'added_by', 'joined_at')
 
 @admin.register(Server)
 class ServerAdmin(admin.ModelAdmin):

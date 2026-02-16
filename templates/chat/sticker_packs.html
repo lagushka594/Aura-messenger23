@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>Наборы стикеров</h2>
+<div class="sticker-packs">
+    {% for pack in packs %}
+    <div class="pack">
+        <h3>{{ pack.name }}</h3>
+        <div class="stickers">
+            {% for sticker in pack.stickers.all %}
+            <img src="{{ sticker.image.url }}" alt="sticker" style="width: 80px; height: 80px; cursor: pointer;" onclick="window.opener.sendSticker({{ sticker.id }})">
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<script>
+// Функция для отправки стикера в открывшее окно (если вызывается из чата)
+function sendSticker(stickerId) {
+    if (window.opener && !window.opener.closed) {
+        window.opener.sendSticker(stickerId);
+        window.close();
+    } else {
+        alert('Это окно нужно открывать из чата');
+    }
+}
+</script>
+{% endblock %}
