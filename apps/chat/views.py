@@ -255,7 +255,8 @@ def upload_file(request, conversation_id):
 def edit_channel(request, conversation_id):
     conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
     participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
-    if not participant.is_admin and conversation.type != 'favorite':
+    # Разрешаем редактирование, если пользователь администратор ИЛИ это личный чат/избранное
+    if not (participant.is_admin or conversation.type in ['private', 'favorite']):
         messages.error(request, 'Недостаточно прав')
         return redirect('chat:room', conversation_id=conversation.id)
     
