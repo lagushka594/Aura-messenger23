@@ -153,6 +153,21 @@ class VoiceConsumer(AsyncWebsocketConsumer):
         if event['data']['sender_id'] != self.user.id:
             await self.send(text_data=json.dumps(event['data']))
 
+    async def user_joined(self, event):
+        """Обработчик события о новом участнике в голосовой комнате."""
+        await self.send(text_data=json.dumps({
+            'type': 'user_joined',
+            'user_id': event['user_id'],
+            'username': event['username'],
+        }))
+
+    async def user_left(self, event):
+        """Обработчик события о выходе участника из голосовой комнаты."""
+        await self.send(text_data=json.dumps({
+            'type': 'user_left',
+            'user_id': event['user_id'],
+        }))
+
     @database_sync_to_async
     def get_voice_room(self):
         try:
