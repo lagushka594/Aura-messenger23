@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="voice-room" style="display: flex; flex-direction: column; height: 100%;">
+    <div class="chat-header">
+        <img src="{% if conversation.avatar %}{{ conversation.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-small">
+        <div class="chat-header-info">
+            <h4>🎙️ {{ voice_room.name }}</h4>
+            <p>Участников в голосовом канале: <span id="active-count">{{ voice_room.active_users.count }}</span></p>
+        </div>
+        <div class="chat-header-actions">
+            <a href="{% url 'chat:room' conversation.id %}" class="btn btn-secondary">⬅️ Назад в чат</a>
+            {% if user in voice_room.active_users.all %}
+                <a href="{% url 'chat:leave_voice' voice_room.id %}" class="btn btn-danger">Покинуть</a>
+            {% else %}
+                <a href="{% url 'chat:join_voice' voice_room.id %}" class="btn btn-success">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="voice-area" style="flex: 1; padding: 20px; background-color: var(--chat-bg);">
+        <div class="participants-list" id="participants-list">
+            <h3>Участники:</h3>
+            <ul>
+                {% for participant in voice_room.active_users.all %}
+                <li data-user-id="{{ participant.id }}">
+                    <img src="{% if participant.avatar %}{{ participant.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-tiny">
+                    {{ participant.get_display_name }}
+                </li>
+                {% empty %}
+                <li>Пока никого нет</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="audio-controls" style="margin-top: 20px;">
+            <p>Голосовая связь работает через WebRTC. Убедитесь, что разрешили доступ к микрофону.</p>
+            <button id="start-audio" class="btn btn-primary">Включить микрофон</button>
+            <button id="stop-audio" class="btn btn-danger" disabled>Выключить</button>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/webrtc.js' %}"></script>
+<script>
+    const voiceRoomId = {{ voice_room.id }};
+    const currentUserId = {{ user.id }};
+    document.addEventListener('DOMContentLoaded', function() {
+        initVoiceSocket(voiceRoomId);
+    });
+</script>
+{% endblock %}

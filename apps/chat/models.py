@@ -71,6 +71,17 @@ class Invite(models.Model):
     def __str__(self):
         return f'Invite to {self.conversation.name} by {self.created_by.username}'
 
+class VoiceRoom(models.Model):
+    """Голосовая комната, связанная с беседой (для групповых голосовых каналов)"""
+    conversation = models.OneToOneField(Conversation, on_delete=models.CASCADE, related_name='voice_room')
+    name = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    active_users = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name='active_voice_rooms')
+    is_active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Voice room for {self.conversation.name}'
+
 class Server(models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_servers')

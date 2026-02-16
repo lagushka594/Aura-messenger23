@@ -14,7 +14,13 @@ class CreateGroupForm(forms.ModelForm):
         }
 
 class CreatePrivateChatForm(forms.Form):
-    # Для создания личного чата нужно выбрать друга.
-    # Но мы можем упростить: при нажатии на "Создать чат" можно предложить ввести ID друга или выбрать из списка.
-    # Для простоты сделаем поле ввода ID друга.
     friend_id = forms.CharField(label='ID друга (никнейм#цифры)', max_length=50)
+
+class EditChannelForm(forms.ModelForm):
+    class Meta:
+        model = Conversation
+        fields = ['name', 'avatar']
+        labels = {
+            'name': 'Название канала',
+            'avatar': 'Аватар канала',
+        }

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="form-container">
+    <h2>Настройки канала</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+    <p><a href="{% url 'chat:room' conversation.id %}" class="back-link">← Назад к чату</a></p>
+</div>
+{% endblock %}

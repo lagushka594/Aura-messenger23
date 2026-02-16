@@ -21,4 +21,8 @@ urlpatterns = [
     path('upload/<int:conversation_id>/', views.upload_file, name='upload_file'),
     # Редактирование канала
     path('edit/<int:conversation_id>/', views.edit_channel, name='edit_channel'),
+    # Голосовые комнаты
+    path('voice/<int:conversation_id>/', views.voice_room, name='voice_room'),
+    path('voice/join/<int:voice_room_id>/', views.join_voice, name='join_voice'),
+    path('voice/leave/<int:voice_room_id>/', views.leave_voice, name='leave_voice'),
 ]

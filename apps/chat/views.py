@@ -5,9 +5,9 @@ from django.db.models import Q, OuterRef, Subquery, F
 from django.http import Http404, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite, FileMessage
+from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite, FileMessage, VoiceRoom
 from apps.users.models import User
-from .forms import CreateGroupForm, CreatePrivateChatForm
+from .forms import CreateGroupForm, CreatePrivateChatForm, EditChannelForm
 import secrets
 import os
 
@@ -45,7 +45,7 @@ def room(request, conversation_id):
             raise Http404("Чат не найден")
     
     Message.objects.filter(conversation=conversation).exclude(sender=request.user).update(is_read=True)
-    messages_list = Message.objects.filter(conversation=conversation).select_related('sender').order_by('timestamp')
+    messages_list = Message.objects.filter(conversation=conversation).select_related('sender').prefetch_related('file').order_by('timestamp')
     participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
     is_admin = participant.is_admin or conversation.type in ['private', 'favorite']
     
@@ -53,12 +53,19 @@ def room(request, conversation_id):
     if conversation.type == 'group' and is_admin:
         invites = conversation.invites.all()
     
+    voice_room = None
+    try:
+        voice_room = conversation.voice_room
+    except VoiceRoom.DoesNotExist:
+        pass
+    
     return render(request, 'chat/room.html', {
         'conversation': conversation,
         'messages': messages_list,
         'is_admin': is_admin,
         'invites': invites,
         'participant': participant,
+        'voice_room': voice_room,
     })
 
 @login_required
@@ -213,7 +220,7 @@ def upload_file(request, conversation_id):
         return JsonResponse({'status': 'ok', 'file_url': file_msg.file.url})
     return JsonResponse({'status': 'error'}, status=400)
 
-# --- Редактирование канала (заглушка) ---
+# --- Редактирование канала ---
 @login_required
 def edit_channel(request, conversation_id):
     conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
@@ -221,5 +228,67 @@ def edit_channel(request, conversation_id):
     if not participant.is_admin and conversation.type != 'favorite':
         messages.error(request, 'Недостаточно прав')
         return redirect('chat:room', conversation_id=conversation.id)
-    messages.info(request, 'Функция в разработке')
-    return redirect('chat:room', conversation_id=conversation.id)
+    
+    if request.method == 'POST':
+        form = EditChannelForm(request.POST, request.FILES, instance=conversation)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Настройки канала обновлены')
+            return redirect('chat:room', conversation_id=conversation.id)
+    else:
+        form = EditChannelForm(instance=conversation)
+    return render(request, 'chat/edit_channel.html', {'form': form, 'conversation': conversation})
+
+# --- Голосовой чат ---
+@login_required
+def voice_room(request, conversation_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    voice_room, created = VoiceRoom.objects.get_or_create(conversation=conversation)
+    if created:
+        voice_room.name = f"Voice of {conversation.name}"
+        voice_room.save()
+    return render(request, 'chat/voice_room.html', {
+        'conversation': conversation,
+        'voice_room': voice_room,
+    })
+
+@login_required
+def join_voice(request, voice_room_id):
+    voice_room = get_object_or_404(VoiceRoom, id=voice_room_id)
+    if request.user not in voice_room.conversation.participants.all():
+        messages.error(request, 'Вы не участник этого чата')
+        return redirect('chat:index')
+    voice_room.active_users.add(request.user)
+    voice_room.is_active = True
+    voice_room.save()
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'voice_{voice_room.id}',
+        {
+            'type': 'user_joined',
+            'user_id': request.user.id,
+            'username': request.user.get_display_name(),
+        }
+    )
+    return redirect('chat:voice_room', conversation_id=voice_room.conversation.id)
+
+@login_required
+def leave_voice(request, voice_room_id):
+    voice_room = get_object_or_404(VoiceRoom, id=voice_room_id)
+    voice_room.active_users.remove(request.user)
+    if voice_room.active_users.count() == 0:
+        voice_room.is_active = False
+    voice_room.save()
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'voice_{voice_room.id}',
+        {
+            'type': 'user_left',
+            'user_id': request.user.id,
+        }
+    )
+    return redirect('chat:room', conversation_id=voice_room.conversation.id)
