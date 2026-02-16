@@ -24,7 +24,8 @@ function initChatSocket(conversationId) {
     };
     
     chatSocket.onclose = function(e) {
-        console.error('Chat socket closed unexpectedly. Code:', e.code, 'Reason:', e.reason);
+        console.error('Chat socket closed unexpectedly. Code:', e.code, 'Reason:', e.reason, 'Was clean:', e.wasClean);
+        // Пытаемся переподключиться через 5 секунд
         setTimeout(() => initChatSocket(conversationId), 5000);
     };
 }
