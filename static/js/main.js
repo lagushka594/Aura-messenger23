@@ -1,6 +1,6 @@
 // Инициализация WebSocket статусов, если пользователь авторизован
 document.addEventListener('DOMContentLoaded', function() {
-    if (document.querySelector('.user-menu')) {
+    if (document.querySelector('.user-menu') || document.querySelector('.sidebar')) {
         initStatusSocket();
     }
 
@@ -22,10 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Инициализация эмодзи-пикера
     if (document.getElementById('emoji-picker')) {
         initEmojiPicker();
     }
 
+    // Инициализация drag-and-drop для загрузки файлов
     const conversationIdElement = document.querySelector('script[data-conversation-id]');
     if (conversationIdElement) {
         const conversationId = conversationIdElement.dataset.conversationId;
@@ -33,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// Функция для drag-and-drop
 function initFileDragAndDrop(conversationId) {
     const dropZone = document.querySelector('.chat-area');
     if (!dropZone) return;

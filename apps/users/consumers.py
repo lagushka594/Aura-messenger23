@@ -1,28 +1,35 @@
 import json
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from django.db import models
 from .models import Friendship
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 class StatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope['user']
         if self.user.is_anonymous:
-            await self.close()
+            logger.warning("Anonymous user rejected from status socket")
+            await self.close(code=4001)
         else:
             self.user_group_name = f'user_{self.user.id}'
             await self.channel_layer.group_add(self.user_group_name, self.channel_name)
+
+            # Устанавливаем статус онлайн, если не невидимка
             if self.user.manual_status != 'invisible':
                 await self.set_online_status(True)
             await self.accept()
+            logger.info(f"User {self.user.id} connected to status socket")
 
     async def disconnect(self, close_code):
         if hasattr(self, 'user') and not self.user.is_anonymous:
             await self.set_online_status(False)
             await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
+            logger.info(f"User {self.user.id} disconnected from status socket, code {close_code}")
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -32,6 +39,7 @@ class StatusConsumer(AsyncWebsocketConsumer):
             await database_sync_to_async(self.user.save)()
             if new_status != 'invisible':
                 await self.broadcast_status_to_friends(new_status)
+            logger.info(f"User {self.user.id} changed status to {new_status}")
 
     async def set_online_status(self, is_online):
         status = 'online' if is_online else 'offline'
