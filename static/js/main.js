@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!response.ok) throw new Error('Upload failed');
                     const data = await response.json();
                     console.log('File uploaded:', data);
+                    // Очищаем input, чтобы можно было загрузить тот же файл повторно
+                    fileInput.value = '';
                 } catch (error) {
                     console.error('Upload error:', error);
                     alert('Не удалось загрузить файл');
@@ -70,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Функция для drag-and-drop (та же)
+// Функция для drag-and-drop
 function initFileDragAndDrop(conversationId) {
     const dropZone = document.querySelector('.chat-area');
     if (!dropZone) return;
@@ -124,19 +126,20 @@ function initFileDragAndDrop(conversationId) {
             }
         }
     }
+}
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+// Вспомогательная функция для получения CSRF токена
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
+    return cookieValue;
 }
