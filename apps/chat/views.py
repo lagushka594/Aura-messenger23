@@ -5,7 +5,7 @@ from django.db.models import Q, OuterRef, Subquery, F, Count
 from django.http import Http404, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
-from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite, FileMessage, VoiceRoom, StickerPack, Sticker, Bot, BotCommand, BotParticipant
+from .models import Conversation, Message, Server, Channel, ConversationParticipant, Invite, FileMessage, VoiceRoom, StickerPack, Sticker, PinnedMessage
 from apps.users.models import User
 from .forms import CreateGroupForm, CreatePrivateChatForm, EditChannelForm
 import secrets
@@ -13,7 +13,7 @@ import os
 
 @login_required
 def index(request):
-    # Аннотация непрочитанных сообщений
+    # Аннотация непрочитанных сообщений и закрепления чата
     unread_subquery = Message.objects.filter(
         conversation=OuterRef('pk'),
         timestamp__gt=OuterRef('conversationparticipant__last_read')
@@ -25,8 +25,15 @@ def index(request):
         last_msg_content=Subquery(
             Message.objects.filter(conversation=OuterRef('pk')).order_by('-timestamp').values('content')[:1]
         ),
-        unread_count=Subquery(unread_subquery)
+        unread_count=Subquery(unread_subquery),
+        is_pinned=Subquery(
+            ConversationParticipant.objects.filter(
+                user=request.user,
+                conversation=OuterRef('pk')
+            ).values('is_pinned')[:1]
+        )
     ).order_by(
+        F('is_pinned').desc(),
         F('last_message__timestamp').desc(nulls_last=True)
     ).select_related('last_message')
     return render(request, 'chat/index.html', {'conversations': conversations})
@@ -58,6 +65,13 @@ def room(request, conversation_id):
     participant.last_read = timezone.now()
     participant.save()
     
+    # Получаем закреплённое сообщение (если есть)
+    try:
+        pinned = PinnedMessage.objects.get(conversation=conversation)
+        pinned_msg = pinned.message
+    except PinnedMessage.DoesNotExist:
+        pinned_msg = None
+
     messages_list = Message.objects.filter(conversation=conversation).select_related('sender', 'sticker').prefetch_related('file').order_by('timestamp')
     is_admin = participant.is_admin or conversation.type in ['private', 'favorite']
     
@@ -71,12 +85,12 @@ def room(request, conversation_id):
     except VoiceRoom.DoesNotExist:
         pass
     
-    # Для стикеров
     sticker_packs = StickerPack.objects.all().prefetch_related('stickers')
     
     return render(request, 'chat/room.html', {
         'conversation': conversation,
         'messages': messages_list,
+        'pinned_message': pinned_msg,
         'is_admin': is_admin,
         'invites': invites,
         'participant': participant,
@@ -390,3 +404,82 @@ def delete_message(request, message_id):
 def bot_list(request):
     bots = Bot.objects.filter(owner=request.user)
     return render(request, 'chat/bot_list.html', {'bots': bots})
+
+# --- Закрепление чата ---
+@login_required
+def pin_chat(request, conversation_id):
+    participant = get_object_or_404(ConversationParticipant, user=request.user, conversation_id=conversation_id)
+    participant.is_pinned = not participant.is_pinned
+    participant.save()
+    return redirect('chat:index')
+
+# --- Удаление чата (скрыть) ---
+@login_required
+def delete_chat(request, conversation_id):
+    participant = get_object_or_404(ConversationParticipant, user=request.user, conversation_id=conversation_id)
+    participant.delete()
+    messages.success(request, 'Чат удалён')
+    return redirect('chat:index')
+
+# --- Закрепление сообщения ---
+@login_required
+def pin_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    conversation = message.conversation
+    participant = ConversationParticipant.objects.get(user=request.user, conversation=conversation)
+    if not (participant.is_admin or message.sender == request.user):
+        messages.error(request, 'Недостаточно прав')
+        return redirect('chat:room', conversation_id=conversation.id)
+    
+    pinned, created = PinnedMessage.objects.get_or_create(
+        conversation=conversation,
+        defaults={'message': message, 'pinned_by': request.user}
+    )
+    if not created:
+        pinned.message = message
+        pinned.pinned_by = request.user
+        pinned.save()
+        messages.success(request, 'Закреплённое сообщение изменено')
+    else:
+        messages.success(request, 'Сообщение закреплено')
+    
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'chat_{conversation.id}',
+        {
+            'type': 'pin_message',
+            'message_id': message.id,
+            'content': message.content[:50],
+        }
+    )
+    return redirect('chat:room', conversation_id=conversation.id)
+
+@login_required
+def unpin_message(request, conversation_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    PinnedMessage.objects.filter(conversation=conversation).delete()
+    messages.success(request, 'Сообщение откреплено')
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'chat_{conversation.id}',
+        {
+            'type': 'unpin_message',
+        }
+    )
+    return redirect('chat:room', conversation_id=conversation.id)
+
+# --- Ответ на сообщение (заглушка) ---
+@login_required
+def reply_message(request, message_id):
+    messages.info(request, 'Функция в разработке')
+    return redirect('chat:room', conversation_id=get_object_or_404(Message, id=message_id).conversation.id)
+
+# --- Пересылка сообщения (заглушка) ---
+@login_required
+def forward_message(request, message_id):
+    messages.info(request, 'Функция в разработке')
+    return redirect('chat:room', conversation_id=get_object_or_404(Message, id=message_id).conversation.id)

@@ -116,4 +116,24 @@ document.addEventListener('DOMContentLoaded', function() {
             if (stopBtn) stopBtn.disabled = true;
         });
     }
-});
+voiceSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    if (data.type === 'user_joined') {
+        console.log('User joined:', data.username);
+        // Добавить элемент в список участников
+        const list = document.querySelector('.participants-list ul');
+        if (list) {
+            const li = document.createElement('li');
+            li.setAttribute('data-user-id', data.user_id);
+            li.innerHTML = `<img src="/static/images/default-avatar.png" class="avatar-tiny"> ${data.username}`;
+            list.appendChild(li);
+        }
+    } else if (data.type === 'user_left') {
+        console.log('User left:', data.user_id);
+        // Удалить элемент из списка
+        const li = document.querySelector(`.participants-list li[data-user-id="${data.user_id}"]`);
+        if (li) li.remove();
+    } else {
+        handleVoiceSignal(data);
+    }
+};

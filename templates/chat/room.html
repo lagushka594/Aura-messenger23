@@ -2,12 +2,13 @@
 {% load static %}
 {% block content %}
 <div class="chat-room" style="display: flex; flex-direction: column; height: 100%;">
-    <div class="chat-header">
+    <div class="chat-header" data-conversation-id="{{ conversation.id }}">
         <img src="{% if conversation.avatar %}{{ conversation.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-small">
         <div class="chat-header-info" id="chat-title">
             <h4>
                 {% if conversation.type == 'favorite' %}⭐ {% endif %}
                 {{ conversation.name|default:'Личный чат' }}
+                {% if participant.is_pinned %}📌{% endif %}
             </h4>
             <p>участников: {{ conversation.participants.count }}</p>
         </div>
@@ -21,6 +22,15 @@
             <a href="{% url 'chat:voice_room' conversation.id %}" class="btn btn-secondary">🎙️ Голосовой канал</a>
         </div>
     </div>
+
+    <!-- Баннер закреплённого сообщения -->
+    {% if pinned_message %}
+    <div id="pinned-banner" onclick="document.getElementById('msg-{{ pinned_message.id }}').scrollIntoView({behavior: 'smooth'});">
+        📌 Закреплено: {{ pinned_message.content|truncatechars:50 }}
+    </div>
+    {% else %}
+    <div id="pinned-banner" style="display: none;"></div>
+    {% endif %}
 
     <!-- Выпадающее меню канала -->
     <div id="channel-menu" class="dropdown-menu" style="display: none;">
@@ -56,7 +66,7 @@
     <div class="messages" id="message-list">
         {% for message in messages %}
             {% if not message.deleted %}
-            <div class="message {% if message.sender == user %}own{% endif %}" id="msg-{{ message.id }}">
+            <div class="message {% if message.sender == user %}own{% endif %}" id="msg-{{ message.id }}" data-message-id="{{ message.id }}" data-sender-id="{{ message.sender.id }}">
                 <img src="{% if message.sender.avatar %}{{ message.sender.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="avatar-tiny">
                 <div class="message-bubble">
                     <span class="message-sender">{{ message.sender.get_display_name }}</span>
@@ -73,12 +83,6 @@
                         {% endif %}
                     </div>
                     <span class="message-time">{{ message.timestamp|time:"H:i" }}</span>
-                    {% if message.sender == user %}
-                    <div class="message-actions">
-                        <a href="{% url 'chat:edit_message' message.id %}" class="btn-edit">✎</a>
-                        <button class="btn-delete" onclick="deleteMessage({{ message.id }})">🗑️</button>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
             {% endif %}
@@ -89,6 +93,8 @@
 
     <!-- Поле ввода и кнопки -->
     <div class="message-input">
+        <input type="file" id="file-input" style="display: none;">
+        <button id="attach-file" class="attach-button">📎</button>
         <textarea id="chat-message" placeholder="Введите сообщение..."></textarea>
         <button id="send-message">➤</button>
         <button id="sticker-btn" class="btn btn-secondary" style="margin-left: 5px;">😊</button>
@@ -107,7 +113,7 @@
 
 <script>
     window.currentUserId = {{ user.id }};
-    const conversationId = {{ conversation.id }};
+    window.conversationId = {{ conversation.id }};
 
     // Меню канала
     document.getElementById('chat-title').addEventListener('click', function(e) {
@@ -158,30 +164,13 @@
         fetch(`/chat/send_sticker/{{ conversation.id }}/${stickerId}/`, {
             method: 'POST',
             headers: {'X-CSRFToken': getCookie('csrftoken')}
-        }).then(() => {
-            // Можно обновить через WebSocket, но для простоты перезагрузим
-            window.location.reload();
-        });
+        }).then(() => window.location.reload());
     }
 
     document.getElementById('sticker-btn')?.addEventListener('click', () => {
         const panel = document.getElementById('sticker-panel');
         panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     });
-
-    // Удаление сообщения
-    function deleteMessage(messageId) {
-        if (confirm('Удалить сообщение?')) {
-            fetch(`/chat/delete_message/${messageId}/`, {
-                method: 'POST',
-                headers: {'X-CSRFToken': getCookie('csrftoken')}
-            }).then(response => response.json()).then(data => {
-                if (data.status === 'ok') {
-                    document.getElementById('msg-' + messageId).remove();
-                }
-            });
-        }
-    }
 
     // Поиск по сообщениям
     document.getElementById('search-messages').addEventListener('input', function(e) {
@@ -211,6 +200,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/contextmenu.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         initChatSocket(conversationId);

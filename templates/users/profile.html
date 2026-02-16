@@ -5,9 +5,9 @@
     <h2>Мой профиль</h2>
     <div class="avatar-wrapper">
         {% if user.avatar %}
-            <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-large">
+            <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-large" id="profile-avatar">
         {% else %}
-            <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-large">
+            <img src="{% static 'images/default-avatar.png' %}" alt="avatar" class="avatar-large" id="profile-avatar">
         {% endif %}
     </div>
     <p><strong>Никнейм:</strong> {{ user.get_display_name }}</p>
@@ -21,5 +21,23 @@
         <a href="{% url 'users:friend_requests' %}" class="btn btn-primary">📨 Заявки</a>
         <a href="{% url 'users:settings' %}" class="btn btn-primary">⚙️ Настройки</a>
     </div>
+
+    <!-- Пасхалка: клик по аватарке 10 раз -->
+    <p id="easter-egg" style="display: none; color: var(--neon);">🎉 Ты нашёл пасхалку! Aura rules!</p>
 </div>
+
+<script>
+    let clickCount = 0;
+    const avatar = document.getElementById('profile-avatar');
+    if (avatar) {
+        avatar.addEventListener('click', function() {
+            clickCount++;
+            if (clickCount === 10) {
+                document.getElementById('easter-egg').style.display = 'block';
+                // Можно добавить звук или анимацию
+                alert('🎉 Поздравляю! Ты нашёл пасхалку!');
+            }
+        });
+    }
+</script>
 {% endblock %}

@@ -91,6 +91,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             logger.error(f"Error in delete_message: {e}")
 
+    async def pin_message(self, event):
+        try:
+            await self.send(text_data=json.dumps({
+                'type': 'pin_message',
+                'message_id': event['message_id'],
+                'content': event['content'],
+            }))
+        except Exception as e:
+            logger.error(f"Error in pin_message: {e}")
+
+    async def unpin_message(self, event):
+        try:
+            await self.send(text_data=json.dumps({
+                'type': 'unpin_message',
+            }))
+        except Exception as e:
+            logger.error(f"Error in unpin_message: {e}")
+
     @database_sync_to_async
     def is_participant(self):
         return Conversation.objects.filter(
@@ -154,7 +172,6 @@ class VoiceConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(event['data']))
 
     async def user_joined(self, event):
-        """Обработчик события о новом участнике в голосовой комнате."""
         await self.send(text_data=json.dumps({
             'type': 'user_joined',
             'user_id': event['user_id'],
@@ -162,7 +179,6 @@ class VoiceConsumer(AsyncWebsocketConsumer):
         }))
 
     async def user_left(self, event):
-        """Обработчик события о выходе участника из голосовой комнаты."""
         await self.send(text_data=json.dumps({
             'type': 'user_left',
             'user_id': event['user_id'],

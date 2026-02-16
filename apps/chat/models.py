@@ -38,6 +38,7 @@ class ConversationParticipant(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
     last_read = models.DateTimeField(null=True, blank=True)
     is_admin = models.BooleanField(default=False)
+    is_pinned = models.BooleanField(default=False)  # закреплён ли чат для пользователя
 
     class Meta:
         unique_together = ('user', 'conversation')
@@ -45,7 +46,7 @@ class ConversationParticipant(models.Model):
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    content = models.TextField(blank=True)  # может быть пустым для стикеров
+    content = models.TextField(blank=True)
     sticker = models.ForeignKey('Sticker', on_delete=models.SET_NULL, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(null=True, blank=True)
@@ -61,6 +62,15 @@ class FileMessage(models.Model):
     filename = models.CharField(max_length=255)
     file_size = models.IntegerField()
     file_type = models.CharField(max_length=100, blank=True)
+
+class PinnedMessage(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='pinned_messages')
+    message = models.ForeignKey(Message, on_delete=models.CASCADE)
+    pinned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    pinned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('conversation', 'message')  # одно закреплённое сообщение на чат (можно несколько, но для простоты ограничим)
 
 class StickerPack(models.Model):
     name = models.CharField(max_length=100)

@@ -46,6 +46,10 @@ function initChatSocket(conversationId) {
             editMessageInChat(data);
         } else if (data.type === 'delete_message') {
             deleteMessageFromChat(data);
+        } else if (data.type === 'pin_message') {
+            pinMessageInChat(data);
+        } else if (data.type === 'unpin_message') {
+            unpinMessageInChat();
         }
     };
     
@@ -80,7 +84,6 @@ function addMessageToChat(data) {
         return;
     }
 
-    // Проверяем, не добавлено ли уже это сообщение
     if (document.getElementById('msg-' + data.id)) {
         console.log('Message already exists, skipping');
         return;
@@ -89,6 +92,8 @@ function addMessageToChat(data) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${data.sender_id === window.currentUserId ? 'own' : ''}`;
     messageDiv.id = 'msg-' + data.id;
+    messageDiv.setAttribute('data-message-id', data.id);
+    messageDiv.setAttribute('data-sender-id', data.sender_id);
 
     const avatar = document.createElement('img');
     avatar.src = data.sender_avatar || '/static/images/default-avatar.png';
@@ -146,6 +151,29 @@ function editMessageInChat(data) {
 function deleteMessageFromChat(data) {
     const msgDiv = document.getElementById('msg-' + data.id);
     if (msgDiv) msgDiv.remove();
+}
+
+function pinMessageInChat(data) {
+    // Можно подсветить закреплённое сообщение
+    console.log('Message pinned:', data.message_id);
+    // Убираем старую подсветку, если есть
+    document.querySelectorAll('.pinned-message').forEach(el => el.classList.remove('pinned-message'));
+    const msgDiv = document.getElementById('msg-' + data.message_id);
+    if (msgDiv) {
+        msgDiv.classList.add('pinned-message');
+        // Показать баннер с закреплённым сообщением
+        const banner = document.getElementById('pinned-banner');
+        if (banner) {
+            banner.innerHTML = `📌 Закреплено: ${data.content}`;
+            banner.style.display = 'block';
+        }
+    }
+}
+
+function unpinMessageInChat() {
+    document.querySelectorAll('.pinned-message').forEach(el => el.classList.remove('pinned-message'));
+    const banner = document.getElementById('pinned-banner');
+    if (banner) banner.style.display = 'none';
 }
 
 function updateFriendStatus(userId, status) {

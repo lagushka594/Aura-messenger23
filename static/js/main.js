@@ -33,9 +33,44 @@ document.addEventListener('DOMContentLoaded', function() {
         const conversationId = conversationIdElement.dataset.conversationId;
         initFileDragAndDrop(conversationId);
     }
+
+    // Кнопка скрепки для загрузки файлов
+    const attachBtn = document.getElementById('attach-file');
+    if (attachBtn) {
+        attachBtn.addEventListener('click', function() {
+            const fileInput = document.getElementById('file-input');
+            if (fileInput) fileInput.click();
+        });
+    }
+
+    const fileInput = document.getElementById('file-input');
+    if (fileInput) {
+        fileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file && window.conversationId) {
+                const formData = new FormData();
+                formData.append('file', file);
+                try {
+                    const response = await fetch(`/chat/upload/${window.conversationId}/`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                    if (!response.ok) throw new Error('Upload failed');
+                    const data = await response.json();
+                    console.log('File uploaded:', data);
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    alert('Не удалось загрузить файл');
+                }
+            }
+        });
+    }
 });
 
-// Функция для drag-and-drop
+// Функция для drag-and-drop (та же)
 function initFileDragAndDrop(conversationId) {
     const dropZone = document.querySelector('.chat-area');
     if (!dropZone) return;

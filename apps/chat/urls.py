@@ -33,4 +33,14 @@ urlpatterns = [
     path('delete_message/<int:message_id>/', views.delete_message, name='delete_message'),
     # Боты
     path('bots/', views.bot_list, name='bot_list'),
+    # Закрепление чата
+    path('pin/<int:conversation_id>/', views.pin_chat, name='pin_chat'),
+    # Удаление чата
+    path('delete_chat/<int:conversation_id>/', views.delete_chat, name='delete_chat'),
+    # Закрепление сообщения
+    path('pin_message/<int:message_id>/', views.pin_message, name='pin_message'),
+    path('unpin_message/<int:conversation_id>/', views.unpin_message, name='unpin_message'),
+    # Ответ и пересылка
+    path('reply/<int:message_id>/', views.reply_message, name='reply_message'),
+    path('forward/<int:message_id>/', views.forward_message, name='forward_message'),
 ]

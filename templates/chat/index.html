@@ -22,6 +22,7 @@
                     <span class="conversation-name">
                         {% if conv.type == 'favorite' %}⭐ {% endif %}
                         {{ conv.name|default:'Личный чат' }}
+                        {% if conv.is_pinned %}📌{% endif %}
                         {% if conv.unread_count %}
                             <span class="unread-badge">{{ conv.unread_count }}</span>
                         {% endif %}
