@@ -5,13 +5,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Aura Messenger</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="Aura Messenger">
+    <meta property="og:description" content="Современный мессенджер с голосовыми каналами, обменом файлами, стикерами и полной конфиденциальностью.">
+    <meta property="og:image" content="{% static 'images/og-image.png' %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aura Messenger">
+    <meta name="twitter:description" content="Современный мессенджер с голосовыми каналами, обменом файлами, стикерами и полной конфиденциальностью.">
+    <meta name="twitter:image" content="{% static 'images/og-image.png' %}">
+
+    <!-- Основные стили -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
+    <!-- Кнопка мобильного меню -->
     <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Меню">☰</button>
 
     <div class="main">
+        <!-- Боковая панель -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3>Aura</h3>
@@ -60,6 +82,7 @@
             {% endif %}
         </aside>
 
+        <!-- Основной контент -->
         <main class="chat-area">
             {% block content %}
             {% endblock %}
@@ -117,6 +140,7 @@
         </div>
     </div>
 
+    <!-- Скрипты -->
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/websocket.js' %}"></script>
     <script src="{% static 'js/emoji-picker.js' %}"></script>
